@@ -1,0 +1,38 @@
+{
+  "feature_names": [
+    "total_precipitation",
+    "max_hourly_precipitation",
+    "rainy_hours",
+    "precipitation_std",
+    "precip_sum_1d",
+    "precip_sum_3d",
+    "precip_sum_7d",
+    "precip_max_3d",
+    "elevation_m",
+    "lat",
+    "lng",
+    "drainage_density",
+    "nearest_water_body_dist",
+    "flood_feature_count",
+    "landuse_residential_count",
+    "landuse_commercial_count",
+    "landuse_industrial_count",
+    "landuse_farmland_count",
+    "landuse_forest_count",
+    "day_of_week",
+    "month",
+    "day_of_year",
+    "is_rainy_season"
+  ],
+  "classifier_metrics": {
+    "auc_roc": 0.9996985025362554,
+    "f1": 0.9970104717354601
+  },
+  "regressor_metrics": {
+    "mae": 0.12443043770598237,
+    "rmse": 0.2081525417573292
+  },
+  "train_size": 6140,
+  "val_size": 1316,
+  "test_size": 1316
+}

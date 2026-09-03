@@ -1,0 +1,41 @@
+{
+  "test_size": 80,
+  "classification": {
+    "accuracy": 0.95,
+    "f1_weighted": 0.95,
+    "f1_macro": 0.9518,
+    "auc_roc": 0.993
+  },
+  "regression": {
+    "mae_cm": 11.59,
+    "rmse_cm": 14.25,
+    "r2": 0.8732,
+    "depth_bucket_accuracy": 0.8125
+  },
+  "confusion_matrix": [
+    [
+      15,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      20,
+      0,
+      0
+    ],
+    [
+      0,
+      3,
+      20,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      21
+    ]
+  ]
+}
