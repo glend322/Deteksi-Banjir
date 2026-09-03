@@ -1,0 +1,31 @@
+model:
+  architecture: "resnet50"
+  pretrained: true
+  num_classes: 4
+  depth_output: true
+
+training:
+  batch_size: 32
+  learning_rate: 0.001
+  epochs: 50
+  optimizer: "adam"
+  scheduler: "cosine"
+  weight_decay: 0.0001
+  seed: 42
+
+data:
+  image_size: 224
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+  augment: true
+
+depth:
+  buckets: ["<20cm", "20-40cm", "40-70cm", ">70cm"]
+  bucket_ranges: [[0, 20], [20, 40], [40, 70], [70, 200]]
+  regression_loss_weight: 0.5
+  classification_loss_weight: 0.5
+
+output:
+  checkpoint_dir: "checkpoints"
+  log_dir: "logs"

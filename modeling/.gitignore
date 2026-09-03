@@ -1,0 +1,25 @@
+__pycache__/
+*.pyc
+.env
+*.egg-info/
+dist/
+build/
+
+# Data (too large for git)
+data/raw/
+data/processed/
+
+# Model checkpoints
+*/checkpoints/*.pt
+*/checkpoints/*.pth
+*/checkpoints/*.onnx
+*/checkpoints/*.pkl
+*/checkpoints/*.h5
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
