@@ -1,0 +1,18 @@
+{
+  "epochs_trained": 3,
+  "best_val_acc": 0.9125,
+  "device": "cpu",
+  "backbone": "mobilenet_v3_small",
+  "class_weights": [
+    0.9633564352989197,
+    1.018580675125122,
+    0.999482274055481,
+    1.018580675125122
+  ],
+  "severity_classes": [
+    "normal",
+    "waspada",
+    "tergenang",
+    "tidak_dapat_dilalui"
+  ]
+}

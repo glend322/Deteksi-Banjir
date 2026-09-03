@@ -46,8 +46,8 @@ All datasets used in the modeling pipeline.
 ## Processed Datasets (ML-Ready)
 
 ### Daily Features
-- **Source:** Derived from rainfall + DEM data
-- **Size:** 8,772 rows × 14 columns
+- **Source:** Derived from rainfall + DEM + OSM data
+- **Size:** 8,772 rows × 22 columns
 - **Rows:** 12 areas × 731 days
 - **Features:**
   - `area_id`, `area_name`, `lat`, `lng`, `date`
@@ -57,7 +57,12 @@ All datasets used in the modeling pipeline.
   - `precipitation_std` — hourly variability
   - `precip_sum_1d`, `precip_sum_3d`, `precip_sum_7d` — rolling sums
   - `precip_max_3d` — max hourly precip in last 3 days
-  - `elevation_m` — area elevation
+  - `elevation_m` — area elevation (unique per area)
+  - `drainage_density` — count of waterways within 1km radius
+  - `nearest_water_body_dist` — distance to nearest water body
+  - `flood_feature_count` — count of flood-related features within 1km
+  - `landuse_{residential,commercial,industrial,farmland,forest}_count` — land use counts within 2km
+- **Preprocessing:** Area coordinates assigned from real Semarang kecamatan locations
 - **File:** `processed/daily_features.csv`
 
 ### Flood Targets
@@ -69,13 +74,13 @@ All datasets used in the modeling pipeline.
 
 ### Geo Features
 - **Source:** OSM + DEM data
-- **Size:** 2,025 grid points
+- **Size:** 12 areas (one row per kecamatan)
 - **Features:** elevation, drainage density, water body distance, flood feature count, land use counts
 - **File:** `processed/geo_features.csv`
 
 ### Area Elevations
-- **Source:** DEM data mapped to rainfall areas
-- **Size:** 12 areas
+- **Source:** DEM data mapped to real kecamatan coordinates
+- **Size:** 12 areas with unique lat/lng and elevation
 - **File:** `processed/area_elevations.csv`
 
 ---
