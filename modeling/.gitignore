@@ -29,19 +29,10 @@ env/
 **/logs/
 *.log
 
-# Raw data (too large for git)
-**/data/raw/rainfall/*.csv
-**/data/raw/rainfall/*.json
-**/data/raw/dem/*.csv
-**/data/raw/dem/*.json
-**/data/raw/osm/*.csv
-**/data/raw/osm/*.json
-**/data/raw/kaggle/
-**/data/raw/_cache/
+# Data (regeneratable via scrapers + features.py)
+**/data/raw/
+**/data/processed/
 
-# Processed data (regeneratable)
-**/data/processed/*.csv
-**/data/processed/*.json
 
 # IDE
 .vscode/
