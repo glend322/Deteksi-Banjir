@@ -1,0 +1,72 @@
+/* ==========================================================================
+   SafeRoute - Alerts & Early Warning Styling
+   ========================================================================== */
+
+.alert-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.alert-card.danger {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+}
+
+.alert-card.warning {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+}
+
+.alert-card.info {
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+}
+
+.alert-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.alert-card.danger .alert-icon-box { background: #FEE2E2; color: #DC2626; }
+.alert-card.warning .alert-icon-box { background: #FEF3C7; color: #D97706; }
+.alert-card.info .alert-icon-box { background: #DBEAFE; color: #2563EB; }
+
+.alert-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.alert-title {
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.alert-location {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.alert-subtext {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.alert-time {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: 4px;
+}

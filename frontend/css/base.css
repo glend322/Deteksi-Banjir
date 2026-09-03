@@ -1,0 +1,150 @@
+/* ==========================================================================
+   SafeRoute - Base Design System & CSS Tokens
+   ========================================================================== */
+
+:root {
+    /* Brand Colors */
+    --primary: #2563EB;
+    --primary-hover: #1D4ED8;
+    --primary-light: #EFF6FF;
+    --primary-subtle: #DBEAFE;
+    --primary-focus: rgba(37, 99, 235, 0.2);
+
+    /* Risk Status Colors */
+    --status-safe: #10B981;
+    --status-safe-hover: #059669;
+    --status-safe-bg: #ECFDF5;
+    --status-safe-border: #A7F3D0;
+
+    --status-watch: #F59E0B;
+    --status-watch-hover: #D97706;
+    --status-watch-bg: #FFFBEB;
+    --status-watch-border: #FDE68A;
+
+    --status-flooded: #F97316;
+    --status-flooded-hover: #EA580C;
+    --status-flooded-bg: #FFF7ED;
+    --status-flooded-border: #FED7AA;
+
+    --status-danger: #EF4444;
+    --status-danger-hover: #DC2626;
+    --status-danger-bg: #FEF2F2;
+    --status-danger-border: #FECACA;
+
+    /* Neutrals & Dark Text */
+    --bg-main: #F8FAFC;
+    --bg-subtle: #F1F5F9;
+    --surface: #FFFFFF;
+    --surface-glass: rgba(255, 255, 255, 0.92);
+    --surface-glass-card: rgba(255, 255, 255, 0.85);
+
+    --border: #E2E8F0;
+    --border-subtle: #F1F5F9;
+    --border-strong: #CBD5E1;
+
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+    --text-white: #FFFFFF;
+
+    /* Shadows */
+    --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+    --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.12), 0 4px 8px rgba(15, 23, 42, 0.05);
+    --shadow-floating: 0 20px 35px -5px rgba(15, 23, 42, 0.15), 0 10px 15px -5px rgba(15, 23, 42, 0.04);
+
+    /* Radii */
+    --radius-xs: 6px;
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --radius-full: 9999px;
+
+    /* Transitions */
+    --transition-fast: 0.18s ease;
+    --transition-base: 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* Layout metrics */
+    --sidebar-width: 260px;
+    --header-height: 72px;
+    --bottom-nav-height: 74px;
+    --drawer-width: 420px;
+}
+
+/* Reset & Base */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text-primary);
+    background-color: var(--bg-main);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+button, input, select, textarea {
+    font-family: inherit;
+    font-size: 14px;
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    background: none;
+    outline: none;
+    user-select: none;
+    transition: all var(--transition-fast);
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+}
+
+/* Common Animations */
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}

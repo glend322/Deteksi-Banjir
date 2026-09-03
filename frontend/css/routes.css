@@ -1,0 +1,159 @@
+/* ==========================================================================
+   SafeRoute - Routes Component Styling
+   ========================================================================== */
+
+.route-input-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #F8FAFC;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+}
+
+.route-pins {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.dot-origin {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary);
+}
+
+.dot-line {
+    width: 2px;
+    height: 24px;
+    background: #CBD5E1;
+}
+
+.dot-dest {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--status-danger);
+}
+
+.route-inputs {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.route-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.route-field-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.route-field-val {
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    padding: 2px 0;
+    outline: none;
+}
+
+.btn-swap-route {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.btn-swap-route:hover {
+    background: #F1F5F9;
+    color: var(--primary);
+    transform: rotate(180deg);
+}
+
+/* Route Cards */
+.route-card {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.route-card:hover {
+    border-color: #94A3B8;
+    background: #F8FAFC;
+}
+
+.route-card.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);
+}
+
+.route-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.route-card-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.route-badge {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+}
+
+.route-badge.best {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.route-badge.caution {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.route-meta {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.route-avoid-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--status-safe);
+}

@@ -1,0 +1,59 @@
+<!-- ==========================================================================
+     SafeRoute Modal: Peringatan Dini & Early Warning
+     ========================================================================== -->
+<div id="modalAlerts" class="modal-overlay">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <div class="modal-title">
+                <button class="btn-close-modal" style="margin-right: 4px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                </button>
+                Peringatan Dini Banjir
+            </div>
+            <button class="btn-close-modal" style="font-size: 20px;">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="tabs-header">
+                <button class="tab-btn active" type="button">Untuk Anda</button>
+                <button class="tab-btn" type="button">Semua Wilayah</button>
+            </div>
+
+            <!-- Alert Cards -->
+            <div class="alert-card danger">
+                <div class="alert-icon-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div class="alert-content">
+                    <div class="alert-title" style="color: #DC2626;">Peringatan Risiko Tinggi</div>
+                    <div class="alert-location">Jl. Kaligawe Raya</div>
+                    <div class="alert-subtext">Kedalaman air 60 cm. Tidak dapat dilalui semua jenis kendaraan bermotor.</div>
+                    <div class="alert-time">10 menit lalu</div>
+                </div>
+            </div>
+
+            <div class="alert-card warning">
+                <div class="alert-icon-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div class="alert-content">
+                    <div class="alert-title" style="color: #D97706;">Waspada Banjir (Prediksi AI)</div>
+                    <div class="alert-location">Kec. Genuk, Semarang</div>
+                    <div class="alert-subtext">Curah hujan tinggi terdeteksi di hulu. Waspada kenaikan genangan dalam 1-2 jam ke depan.</div>
+                    <div class="alert-time">30 menit lalu</div>
+                </div>
+            </div>
+
+            <div class="alert-card info">
+                <div class="alert-icon-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                </div>
+                <div class="alert-content">
+                    <div class="alert-title" style="color: #2563EB;">Update Rute Navigasi</div>
+                    <div class="alert-subtext">Rute Anda telah otomatis diperbarui untuk menghindari area banjir di Kaligawe.</div>
+                    <div class="alert-time">45 menit lalu</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

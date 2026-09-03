@@ -1,0 +1,92 @@
+<!-- ==========================================================================
+     SafeRoute Modal: Rekomendasi Rute Aman
+     ========================================================================== -->
+<div id="modalRoute" class="modal-overlay">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <div class="modal-title">
+                <button class="btn-close-modal" style="margin-right: 4px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                </button>
+                Rekomendasi Rute Aman
+            </div>
+            <button class="btn-close-modal" style="font-size: 20px;">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <!-- Route Inputs -->
+            <div class="route-input-group">
+                <div class="route-pins">
+                    <div class="dot-origin"></div>
+                    <div class="dot-line"></div>
+                    <div class="dot-dest"></div>
+                </div>
+                <div class="route-inputs">
+                    <div class="route-field">
+                        <span class="route-field-label">Dari</span>
+                        <input type="text" class="route-field-val" value="Lokasi Saat Ini (Jl. Setiabudi)">
+                    </div>
+                    <div class="route-field">
+                        <span class="route-field-label">Ke</span>
+                        <input type="text" class="route-field-val" value="Stasiun Tawang Semarang">
+                    </div>
+                </div>
+                <button class="btn-swap-route" type="button" title="Tukar Lokasi">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 10 12 15 17 10"/><polyline points="17 14 12 9 7 14"/></svg>
+                </button>
+            </div>
+
+            <div style="font-size: 13px; font-weight: 800; color: var(--text-primary);">Opsi Rute Pilihan AI</div>
+
+            <!-- Route Options Cards -->
+            <div class="route-card selected" data-route-id="route-safe">
+                <div class="route-card-header">
+                    <div class="route-card-title">
+                        <span style="color: var(--status-safe); font-size: 18px;">➔</span>
+                        Rute Teraman
+                    </div>
+                    <span class="route-badge best">Terbaik</span>
+                </div>
+                <div class="route-meta">34 menit • 12,4 km</div>
+                <div class="route-avoid-tag">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Menghindari 3 area banjir (Bebas Banjir 100%)
+                </div>
+            </div>
+
+            <div class="route-card" data-route-id="route-fastest">
+                <div class="route-card-header">
+                    <div class="route-card-title">
+                        <span style="color: var(--status-watch); font-size: 18px;">➔</span>
+                        Rute Tercepat
+                    </div>
+                    <span class="route-badge caution">Risiko Sedang</span>
+                </div>
+                <div class="route-meta">28 menit • 10,1 km</div>
+                <div style="font-size: 12px; font-weight: 600; color: var(--status-watch);">
+                    ⚠️ Menghindari 1 area banjir (Melintasi genangan 15 cm di Gayamsari)
+                </div>
+            </div>
+
+            <div class="route-card" data-route-id="route-alternative">
+                <div class="route-card-header">
+                    <div class="route-card-title">
+                        <span style="color: var(--primary); font-size: 18px;">➔</span>
+                        Rute Alternatif
+                    </div>
+                </div>
+                <div class="route-meta">37 menit • 13,2 km</div>
+                <div style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">
+                    Menghindari 2 area banjir (Via Jalur Arteri Barat)
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button id="btnStartNavigation" class="btn-view-route" type="button">
+                Mulai Panduan Navigasi
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            </button>
+        </div>
+    </div>
+</div>

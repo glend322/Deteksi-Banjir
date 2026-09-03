@@ -1,0 +1,958 @@
+/* ==========================================================================
+   SafeRoute - Beranda (Home / Dashboard) Styling
+   Rich Modern Aesthetics with HSL-tailored colors, glassmorphism & cards
+   ========================================================================== */
+
+.beranda-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 24px 32px 48px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
+}
+
+/* ==========================================================================
+   1. Hero Status Banner (Live Emergency Broadcast)
+   ========================================================================== */
+.beranda-hero {
+    position: relative;
+    border-radius: var(--radius-xl);
+    padding: 28px 32px;
+    background: linear-gradient(135deg, #1E3A8A 0%, #1E40AF 50%, #2563EB 100%);
+    color: white;
+    box-shadow: 0 16px 36px -8px rgba(30, 58, 138, 0.35);
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+}
+
+.beranda-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 680px;
+}
+
+.hero-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.hero-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: rgba(239, 68, 68, 0.25);
+    border: 1px solid rgba(254, 202, 202, 0.5);
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #FEE2E2;
+}
+
+.hero-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #EF4444;
+    box-shadow: 0 0 10px #EF4444;
+    animation: pulse 1.5s infinite;
+}
+
+.hero-time-tag {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+.hero-title {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
+}
+
+.hero-desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.88);
+    margin-bottom: 20px;
+}
+
+.hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-hero-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    background: #FFFFFF;
+    color: var(--primary);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 800;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    transition: all var(--transition-fast);
+}
+
+.btn-hero-primary:hover {
+    background: #EFF6FF;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-hero-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: white;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 700;
+    backdrop-filter: blur(8px);
+    transition: all var(--transition-fast);
+}
+
+.btn-hero-outline:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.hero-emergency-call-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: #DC2626;
+    color: white;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 800;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+    transition: all var(--transition-fast);
+}
+
+.hero-emergency-call-btn:hover {
+    background: #B91C1C;
+    transform: translateY(-2px);
+}
+
+.hero-side-illustration {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.side-weather-temp {
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.side-weather-condition {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.side-weather-sub {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* ==========================================================================
+   2. KPI Metric Cards Bar
+   ========================================================================== */
+.beranda-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+}
+
+.kpi-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+}
+
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: #CBD5E1;
+}
+
+.kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.kpi-card.danger::before { background: var(--status-danger); }
+.kpi-card.watch::before { background: var(--status-watch); }
+.kpi-card.safe::before { background: var(--status-safe); }
+.kpi-card.primary::before { background: var(--primary); }
+
+.kpi-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.kpi-icon-box {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.kpi-icon-box.danger { background: var(--status-danger-bg); color: var(--status-danger); }
+.kpi-icon-box.watch { background: var(--status-watch-bg); color: var(--status-watch); }
+.kpi-icon-box.safe { background: var(--status-safe-bg); color: var(--status-safe); }
+.kpi-icon-box.primary { background: var(--primary-light); color: var(--primary); }
+
+.kpi-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+}
+
+.kpi-badge.danger { background: var(--status-danger-bg); color: var(--status-danger); }
+.kpi-badge.watch { background: var(--status-watch-bg); color: var(--status-watch); }
+.kpi-badge.safe { background: var(--status-safe-bg); color: var(--status-safe); }
+.kpi-badge.primary { background: var(--primary-light); color: var(--primary); }
+
+.kpi-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.kpi-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.kpi-subtext {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* ==========================================================================
+   Section Headers & Common Card Wrappers
+   ========================================================================== */
+.beranda-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.section-head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.section-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.section-action-link {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.section-action-link:hover {
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   3. Kontak & Lembaga Penanganan Darurat Kota Semarang (FITUR UTAMA REQUEST)
+   ========================================================================== */
+.contacts-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.contact-filter-chip {
+    padding: 7px 16px;
+    border-radius: var(--radius-full);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    transition: all var(--transition-fast);
+}
+
+.contact-filter-chip:hover {
+    border-color: #CBD5E1;
+    color: var(--primary);
+}
+
+.contact-filter-chip.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25);
+}
+
+.contacts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}
+
+.contact-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+    position: relative;
+}
+
+.contact-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: #CBD5E1;
+}
+
+.contact-top-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.contact-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 20px;
+}
+
+.contact-icon-box.red { background: #FEE2E2; color: #DC2626; }
+.contact-icon-box.blue { background: #DBEAFE; color: #2563EB; }
+.contact-icon-box.orange { background: #FFEDD5; color: #EA580C; }
+.contact-icon-box.green { background: #D1FAE5; color: #059669; }
+
+.contact-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.contact-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+    line-height: 1.3;
+}
+
+.contact-desc {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.contact-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+}
+
+.contact-uptime {
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.contact-uptime.active { color: var(--status-safe); }
+.contact-uptime.busy { color: var(--status-watch); }
+
+.contact-number-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.contact-btn-group {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.btn-call-now {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 14px;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    color: white;
+    border-radius: var(--radius-md);
+    font-size: 12px;
+    font-weight: 800;
+    transition: all var(--transition-fast);
+}
+
+.btn-call-now:hover {
+    background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.btn-call-now.urgent {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+}
+
+.btn-call-now.urgent:hover {
+    background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-copy-num {
+    padding: 10px 12px;
+    background: #F1F5F9;
+    color: var(--text-secondary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-copy-num:hover {
+    background: #E2E8F0;
+    color: var(--text-primary);
+}
+
+/* ==========================================================================
+   4. Telemetri Ketinggian Muka Air (TMA) & Status Pompa (WIDGET PENDUKUNG)
+   ========================================================================== */
+.two-col-dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 20px;
+}
+
+.dashboard-panel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sensor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sensor-item-card {
+    background: #F8FAFC;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all var(--transition-fast);
+}
+
+.sensor-item-card:hover {
+    border-color: #CBD5E1;
+    background: #FFFFFF;
+}
+
+.sensor-top-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sensor-name {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sensor-tma-val {
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.sensor-tma-val.danger { color: var(--status-danger); }
+.sensor-tma-val.watch { color: var(--status-watch); }
+.sensor-tma-val.safe { color: var(--status-safe); }
+
+.sensor-progress-track {
+    width: 100%;
+    height: 7px;
+    background: #E2E8F0;
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.sensor-progress-fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    transition: width 0.6s ease;
+}
+
+.sensor-progress-fill.danger { background: var(--status-danger); }
+.sensor-progress-fill.watch { background: var(--status-watch); }
+.sensor-progress-fill.safe { background: var(--status-safe); }
+
+.sensor-bottom-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.pump-active-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #EFF6FF;
+    color: var(--primary);
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   5. Weather 24-Hour Timeline & Rainfall Intensity
+   ========================================================================== */
+.weather-card-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.weather-current-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+    border-radius: var(--radius-md);
+    border: 1px solid #BFDBFE;
+}
+
+.weather-temp-huge {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.weather-stats-row {
+    display: flex;
+    gap: 14px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.weather-hourly-slider {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+}
+
+.weather-hour-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    background: #F8FAFC;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    min-width: 72px;
+    text-align: center;
+}
+
+.weather-hour-box.now {
+    background: var(--primary-light);
+    border-color: #BFDBFE;
+}
+
+.hour-time {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 700;
+}
+
+.hour-temp {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.hour-rain-tag {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* ==========================================================================
+   6. Posko Evakuasi Darurat (Shelter Status)
+   ========================================================================== */
+.shelter-card-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+.shelter-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: var(--shadow-sm);
+}
+
+.shelter-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.shelter-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.shelter-status-tag {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+}
+
+.shelter-status-tag.ready { background: var(--status-safe-bg); color: var(--status-safe); }
+.shelter-status-tag.crowded { background: var(--status-watch-bg); color: var(--status-watch); }
+
+.shelter-meta-row {
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.shelter-supplies {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: #F1F5F9;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+}
+
+/* ==========================================================================
+   7. Panduan Siaga & Batas Kendaraan (Actionable Guide)
+   ========================================================================== */
+.guide-container-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    box-shadow: var(--shadow-sm);
+}
+
+.vehicle-wading-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.vehicle-threshold-card {
+    background: #F8FAFC;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+}
+
+.vehicle-icon {
+    font-size: 26px;
+    margin-bottom: 4px;
+}
+
+.vehicle-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.vehicle-depth-badge {
+    font-size: 16px;
+    font-weight: 800;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    margin: 4px 0;
+}
+
+.vehicle-depth-badge.low { background: #FEE2E2; color: #DC2626; }
+.vehicle-depth-badge.medium { background: #FEF3C7; color: #B45309; }
+.vehicle-depth-badge.high { background: #D1FAE5; color: #059669; }
+.vehicle-depth-badge.special { background: #DBEAFE; color: #1D4ED8; }
+
+.vehicle-note {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.3;
+}
+
+/* ==========================================================================
+   8. Live Community Reports Feed
+   ========================================================================== */
+.community-feed-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.feed-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.feed-item:hover {
+    border-color: #CBD5E1;
+    box-shadow: var(--shadow-sm);
+}
+
+.feed-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #F1F5F9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.feed-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.feed-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.feed-author {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.feed-ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: var(--radius-full);
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.feed-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.feed-time {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* ==========================================================================
+   Responsive Adaptations for Beranda
+   ========================================================================== */
+@media (max-width: 1100px) {
+    .beranda-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .two-col-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vehicle-wading-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .beranda-container {
+        padding: 16px;
+        gap: 20px;
+    }
+
+    .beranda-hero {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+    }
+
+    .hero-side-illustration {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 12px 18px;
+    }
+
+    .beranda-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .contacts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vehicle-wading-grid {
+        grid-template-columns: 1fr;
+    }
+}

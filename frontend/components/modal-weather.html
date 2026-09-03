@@ -1,0 +1,42 @@
+<!-- ==========================================================================
+     SafeRoute Modal: Detail Prakiraan Cuaca BMKG
+     ========================================================================== -->
+<div id="modalWeather" class="modal-overlay">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <div class="modal-title">
+                <button class="btn-close-modal" style="margin-right: 4px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                </button>
+                Prakiraan Cuaca BMKG
+            </div>
+            <button class="btn-close-modal" style="font-size: 20px;">&times;</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="weather-current-banner">
+                <div>
+                    <div style="font-size: 12px; font-weight: 700; color: #1E40AF;">Stasiun Meteorologi Ahmad Yani</div>
+                    <div class="weather-temp-huge">27°C</div>
+                    <div style="font-size: 14px; font-weight: 800; color: #1E3A8A; margin-top: 4px;">Hujan Ringan - Sedang</div>
+                </div>
+                <div style="text-align: right; font-size: 11px; color: #1E40AF;">
+                    <div>💧 Kelembaban: <strong>86%</strong></div>
+                    <div style="margin-top: 3px;">💨 Kecepatan Angin: <strong>14 km/h</strong></div>
+                    <div style="margin-top: 3px;">🌊 Pasang Rob: <strong>+110 cm (Puncak)</strong></div>
+                </div>
+            </div>
+
+            <div style="font-size: 13px; font-weight: 800; color: var(--text-primary); margin-top: 8px;">Peringatan Cuaca Ekstrem</div>
+            <div class="alert-card warning">
+                <div class="alert-icon-box">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <div class="alert-content">
+                    <div class="alert-title" style="color: #B45309;">Potensi Hujan Lebat Disertai Angin Kencang</div>
+                    <div class="alert-subtext">Wilayah Semarang Timur, Genuk, dan Gayamsari berpotensi hujan intensitas tinggi hingga sore hari.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

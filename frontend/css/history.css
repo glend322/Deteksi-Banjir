@@ -1,0 +1,45 @@
+/* ==========================================================================
+   SafeRoute - History (Trips & Reports) Styling
+   ========================================================================== */
+
+.history-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all var(--transition-fast);
+}
+
+.history-card:hover {
+    border-color: #CBD5E1;
+    box-shadow: var(--shadow-sm);
+}
+
+.history-date {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.history-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.history-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.history-badge {
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 4px;
+}
+
+.history-badge.safe { color: var(--status-safe); }
+.history-badge.watch { color: var(--status-watch); }

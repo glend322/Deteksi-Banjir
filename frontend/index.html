@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2563EB">
+    <meta name="description" content="SafeRoute Semarang — Deteksi Banjir Real-Time, Rekomendasi Rute Teraman, dan Pusat Informasi Tanggap Darurat Bencana Berbasis AI.">
+    <title>SafeRoute Semarang — Deteksi Banjir & Navigasi Rute Aman</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <!-- Application Stylesheet (Modular Master) -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- 1. Splash / Onboarding Component Slot (components/splash.html) -->
+    <div id="component-splash"></div>
+
+    <!-- 2. Main App Container Shell -->
+    <div id="appContainer" class="app-container">
+
+        <!-- Desktop Sidebar Component Slot (components/sidebar.html) -->
+        <div id="component-sidebar"></div>
+
+        <!-- Main Viewport Pane -->
+        <main class="main-viewport">
+            <!-- Topbar Header Component Slot (components/topbar.html) -->
+            <div id="component-topbar"></div>
+
+            <!-- VIEW 1: Fitur Beranda Component Slot (components/beranda.html) -->
+            <div id="component-beranda"></div>
+
+            <!-- VIEW 2: Fitur Peta Component Slot (components/map.html) -->
+            <div id="component-map"></div>
+
+            <!-- Detail Lokasi Drawer Component Slot (components/drawer.html) -->
+            <div id="component-drawer"></div>
+        </main>
+
+        <!-- Mobile Bottom Nav Component Slot (components/mobile-nav.html) -->
+        <div id="component-mobile-nav"></div>
+    </div>
+
+    <!-- 3. Modal Dialog Components Slots (components/modal-*.html) -->
+    <div id="component-modal-route"></div>
+    <div id="component-modal-alerts"></div>
+    <div id="component-modal-report"></div>
+    <div id="component-modal-history"></div>
+    <div id="component-modal-education"></div>
+    <div id="component-modal-weather"></div>
+    <div id="component-modal-profile"></div>
+
+    <!-- Floating Return Button (Desktop Viewport Simulator) -->
+    <button id="btnFloatingDesktopReturn" class="floating-desktop-return" type="button" onclick="document.getElementById('btnToggleDevice').click()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+        Kembali ke Tampilan Desktop
+    </button>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Application Data Modules (Clean & Separated) -->
+    <script src="js/data/templates-registry.js"></script>
+    <script src="js/data/app-data.js"></script>
+    <script src="js/data/flood-data.js"></script>
+    <script src="js/data/weather-data.js"></script>
+    <script src="js/data/routes-data.js"></script>
+    <script src="js/data/contacts-data.js"></script>
+    <script src="js/data/sensors-data.js"></script>
+    <script src="js/data/shelters-data.js"></script>
+    <script src="js/data/alerts-data.js"></script>
+    <script src="js/data/guides-data.js"></script>
+    <script src="js/data/history-data.js"></script>
+    <script src="js/data/data.js"></script>
+
+    <!-- Application Logic Modules (Clean & Separated) -->
+    <script src="js/modules/components.js"></script>
+    <script src="js/modules/map.js"></script>
+    <script src="js/modules/drawer.js"></script>
+    <script src="js/modules/beranda.js"></script>
+    <script src="js/modules/routes.js"></script>
+    <script src="js/modules/alerts.js"></script>
+    <script src="js/modules/reports.js"></script>
+    <script src="js/modules/history.js"></script>
+    <script src="js/modules/contacts.js"></script>
+    <script src="js/modules/education.js"></script>
+    <script src="js/modules/profile.js"></script>
+    <script src="js/modules/weather.js"></script>
+
+    <!-- Main Coordinator Script -->
+    <script src="js/app.js"></script>
+</body>
+
+</html>

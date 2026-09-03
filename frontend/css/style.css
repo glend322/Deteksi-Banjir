@@ -1,0 +1,182 @@
+/* ==========================================================================
+   SafeRoute - Master Stylesheet
+   Imports all modular stylesheets per component & feature
+   ========================================================================== */
+
+@import url('base.css');
+@import url('layout.css');
+@import url('beranda.css');
+@import url('map.css');
+@import url('drawer.css');
+@import url('modals.css');
+@import url('routes.css');
+@import url('alerts.css');
+@import url('reports.css');
+@import url('history.css');
+@import url('contacts.css');
+@import url('education.css');
+@import url('profile.css');
+
+/* ==========================================================================
+   Splash / Onboarding Screen
+   ========================================================================== */
+.splash-overlay {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(180deg, #1E3A8A 0%, #2563EB 60%, #3B82F6 100%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 60px 32px 48px 32px;
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.5s;
+}
+
+.splash-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.splash-bg-decor {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.splash-center-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin: auto 0;
+    color: white;
+}
+
+.splash-cloud-logo {
+    width: 88px;
+    height: 88px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(12px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
+}
+
+.splash-brand {
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+}
+
+.splash-headline {
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #DBEAFE;
+}
+
+.splash-desc {
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 320px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.splash-footer {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.splash-dots {
+    display: flex;
+    gap: 8px;
+}
+
+.splash-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    transition: all var(--transition-fast);
+}
+
+.splash-dot.active {
+    width: 24px;
+    border-radius: 4px;
+    background: #FFFFFF;
+}
+
+.btn-splash-start {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 340px;
+    padding: 16px 24px;
+    background: #FFFFFF;
+    color: var(--primary);
+    border-radius: var(--radius-md);
+    font-size: 16px;
+    font-weight: 800;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    transition: all var(--transition-fast);
+}
+
+.btn-splash-start:hover {
+    background: #F8FAFC;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* ==========================================================================
+   Leaflet Custom Map Markers
+   ========================================================================== */
+.custom-flood-pin {
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+    transition: transform 0.2s ease;
+}
+
+.custom-flood-pin:hover {
+    transform: scale(1.15) !important;
+}
+
+.custom-user-marker {
+    filter: drop-shadow(0 0 6px rgba(37, 99, 235, 0.6));
+}
+
+/* Application Toast */
+#appToast {
+    position: fixed;
+    bottom: 84px;
+    left: 50%;
+    transform: translateX(-50%) translateY(30px);
+    background: #0F172A;
+    color: #FFFFFF;
+    padding: 12px 24px;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    z-index: 3500;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+    text-align: center;
+    max-width: 90%;
+}

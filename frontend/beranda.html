@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2563EB">
+    <title>SafeRoute Semarang — Beranda & Dashboard Darurat</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <div id="appContainer" class="app-container">
+        <!-- Sidebar Navigation Component -->
+        <div id="component-sidebar" data-component-file="components/sidebar.html"></div>
+
+        <!-- Main Viewport -->
+        <main class="main-viewport">
+            <!-- Topbar Header Component -->
+            <div id="component-topbar" data-component-file="components/topbar.html"></div>
+
+            <!-- Beranda View Component -->
+            <div id="component-beranda" data-component-file="components/beranda.html"></div>
+        </main>
+
+        <!-- Mobile Bottom Nav Component -->
+        <div id="component-mobile-nav" data-component-file="components/mobile-nav.html"></div>
+    </div>
+
+    <!-- Modals Components -->
+    <div id="component-modal-route" data-component-file="components/modal-route.html"></div>
+    <div id="component-modal-alerts" data-component-file="components/modal-alerts.html"></div>
+    <div id="component-modal-report" data-component-file="components/modal-report.html"></div>
+    <div id="component-modal-history" data-component-file="components/modal-history.html"></div>
+    <div id="component-modal-education" data-component-file="components/modal-education.html"></div>
+    <div id="component-modal-weather" data-component-file="components/modal-weather.html"></div>
+    <div id="component-modal-profile" data-component-file="components/modal-profile.html"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Data Modules -->
+    <script src="js/data/templates-registry.js"></script>
+    <script src="js/data/app-data.js"></script>
+    <script src="js/data/flood-data.js"></script>
+    <script src="js/data/weather-data.js"></script>
+    <script src="js/data/routes-data.js"></script>
+    <script src="js/data/contacts-data.js"></script>
+    <script src="js/data/sensors-data.js"></script>
+    <script src="js/data/shelters-data.js"></script>
+    <script src="js/data/alerts-data.js"></script>
+    <script src="js/data/guides-data.js"></script>
+    <script src="js/data/history-data.js"></script>
+    <script src="js/data/data.js"></script>
+
+    <!-- Modules Logic -->
+    <script src="js/modules/components.js"></script>
+    <script src="js/modules/beranda.js"></script>
+    <script src="js/modules/map.js"></script>
+    <script src="js/modules/drawer.js"></script>
+    <script src="js/modules/routes.js"></script>
+    <script src="js/modules/alerts.js"></script>
+    <script src="js/modules/reports.js"></script>
+    <script src="js/modules/history.js"></script>
+    <script src="js/modules/contacts.js"></script>
+    <script src="js/modules/education.js"></script>
+    <script src="js/modules/profile.js"></script>
+    <script src="js/modules/weather.js"></script>
+
+    <!-- App Coordinator -->
+    <script src="js/app.js"></script>
+</body>
+
+</html>
