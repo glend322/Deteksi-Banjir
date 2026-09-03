@@ -1,24 +1,53 @@
-__pycache__/
-*.pyc
+# Environment
 .env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 *.egg-info/
 dist/
 build/
+*.egg
 
-# Data (too large for git)
-data/raw/
-data/processed/
+# Virtual environments
+venv/
+env/
+.venv/
 
-# Model checkpoints
-*/checkpoints/*.pt
-*/checkpoints/*.pth
-*/checkpoints/*.onnx
-*/checkpoints/*.pkl
-*/checkpoints/*.h5
+# Jupyter
+.ipynb_checkpoints/
+
+# Model checkpoints (large files)
+**/checkpoints/*.pkl
+**/checkpoints/*.pt
+**/checkpoints/*.pth
+**/checkpoints/*.onnx
+**/checkpoints/*.bin
+
+# Logs
+**/logs/
+*.log
+
+# Raw data (too large for git)
+**/data/raw/rainfall/*.csv
+**/data/raw/rainfall/*.json
+**/data/raw/dem/*.csv
+**/data/raw/dem/*.json
+**/data/raw/osm/*.csv
+**/data/raw/osm/*.json
+**/data/raw/kaggle/
+**/data/raw/_cache/
+
+# Processed data (regeneratable)
+**/data/processed/*.csv
+**/data/processed/*.json
 
 # IDE
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # OS
 .DS_Store
