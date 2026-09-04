@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
+import cv2
 import numpy as np
 import torch
 from PIL import Image
@@ -168,7 +169,6 @@ class FloodDetectionPipeline:
 
             cv_result = self._run_cv_inference(frame_bytes)
 
-            import cv2
             cam_key = f"cctv_{camera.cctv_id}_{camera.link_id}"
             is_genuine, filter_reasons, conf_mod = self._run_false_positive_filter(
                 frame_bytes, cv_result, cam_key

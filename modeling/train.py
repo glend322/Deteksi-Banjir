@@ -36,7 +36,7 @@ torch.manual_seed(SEED)
 
 class FloodImageDataset(Dataset):
     """
-    Dataset for flood image classification.
+    Dataset for flood image classification + depth estimation.
 
     Expected directory structure:
       data_dir/
@@ -47,7 +47,9 @@ class FloodImageDataset(Dataset):
           img1.jpg
           img2.jpg
 
-    If no data directory exists, generates synthetic data for demo.
+    Depth labels are auto-generated:
+      - no_flood: depth = 0 cm
+      - flood: depth = random 15-80 cm (synthetic)
     """
 
     def __init__(self, data_dir: str, transform=None):
@@ -69,17 +71,22 @@ class FloodImageDataset(Dataset):
                 continue
             for img_path in class_dir.glob("*"):
                 if img_path.suffix.lower() in {".jpg", ".jpeg", ".png", ".bmp"}:
-                    self.samples.append((str(img_path), label))
+                    if label == 0:
+                        depth = 0.0
+                    else:
+                        depth = random.uniform(15.0, 80.0)
+                    self.samples.append((str(img_path), label, depth))
 
         logger.info(f"Loaded {len(self.samples)} images: "
-                     f"{sum(1 for _, l in self.samples if l == 0)} no_flood, "
-                     f"{sum(1 for _, l in self.samples if l == 1)} flood")
+                     f"{sum(1 for _, l, _ in self.samples if l == 0)} no_flood, "
+                     f"{sum(1 for _, l, _ in self.samples if l == 1)} flood")
 
     def _generate_synthetic(self, n: int):
         for i in range(n):
             img = np.random.randint(0, 255, (224, 224, 3), dtype=np.uint8)
             label = random.choice([0, 1])
-            self.samples.append((img, label))
+            depth = 0.0 if label == 0 else random.uniform(15.0, 80.0)
+            self.samples.append((img, label, depth))
 
         logger.info(f"Generated {n} synthetic samples for demo training")
 
@@ -87,7 +94,7 @@ class FloodImageDataset(Dataset):
         return len(self.samples)
 
     def __getitem__(self, idx):
-        path_or_array, label = self.samples[idx]
+        path_or_array, label, depth = self.samples[idx]
 
         if isinstance(path_or_array, str):
             img = Image.open(path_or_array).convert("RGB")
@@ -97,7 +104,7 @@ class FloodImageDataset(Dataset):
         if self.transform:
             img = self.transform(img)
 
-        return img, torch.tensor(label, dtype=torch.long)
+        return img, torch.tensor(label, dtype=torch.long), torch.tensor(depth, dtype=torch.float32)
 
 
 class SyntheticDepthDataset(Dataset):
@@ -143,16 +150,19 @@ def train_one_epoch(model, loader, criterion_cls, criterion_depth, optimizer, de
     total_loss = 0
     correct = 0
     total = 0
+    depth_errors = []
 
-    for images, labels in loader:
+    for images, labels, depths in loader:
         images = images.to(device)
         labels = labels.to(device)
+        depths = depths.to(device)
 
         optimizer.zero_grad()
         out = model(images)
 
         loss_cls = criterion_cls(out["logits"], labels)
-        loss = loss_cls
+        loss_depth = criterion_depth(out["depth_cm"], depths)
+        loss = cls_weight * loss_cls + depth_weight * loss_depth
         loss.backward()
         optimizer.step()
 
@@ -160,10 +170,12 @@ def train_one_epoch(model, loader, criterion_cls, criterion_depth, optimizer, de
         preds = out["logits"].argmax(dim=1)
         correct += (preds == labels).sum().item()
         total += images.size(0)
+        depth_errors.extend(torch.abs(out["depth_cm"] - depths).cpu().detach().numpy().tolist())
 
     avg_loss = total_loss / total if total > 0 else 0
     accuracy = correct / total if total > 0 else 0
-    return avg_loss, accuracy
+    avg_depth_mae = np.mean(depth_errors) if depth_errors else 0
+    return avg_loss, accuracy, avg_depth_mae
 
 
 @torch.no_grad()
@@ -172,10 +184,12 @@ def evaluate(model, loader, criterion_cls, device):
     total_loss = 0
     correct = 0
     total = 0
+    depth_errors = []
 
-    for images, labels in loader:
+    for images, labels, depths in loader:
         images = images.to(device)
         labels = labels.to(device)
+        depths = depths.to(device)
 
         out = model(images)
         loss = criterion_cls(out["logits"], labels)
@@ -184,10 +198,12 @@ def evaluate(model, loader, criterion_cls, device):
         preds = out["logits"].argmax(dim=1)
         correct += (preds == labels).sum().item()
         total += images.size(0)
+        depth_errors.extend(torch.abs(out["depth_cm"] - depths).cpu().detach().numpy().tolist())
 
     avg_loss = total_loss / total if total > 0 else 0
     accuracy = correct / total if total > 0 else 0
-    return avg_loss, accuracy
+    avg_depth_mae = np.mean(depth_errors) if depth_errors else 0
+    return avg_loss, accuracy, avg_depth_mae
 
 
 def main():
@@ -198,6 +214,8 @@ def main():
     parser.add_argument("--lr", type=float, default=0.001, help="Learning rate")
     parser.add_argument("--backbone", type=str, default="mobilenet_v3_small", help="CNN backbone")
     parser.add_argument("--save_best", action="store_true", default=True, help="Save best model")
+    parser.add_argument("--cls_weight", type=float, default=0.7, help="Classification loss weight")
+    parser.add_argument("--depth_weight", type=float, default=0.3, help="Depth loss weight")
     args = parser.parse_args()
 
     from cv_model import FloodClassifier
@@ -221,45 +239,53 @@ def main():
     model = FloodClassifier(num_classes=2, pretrained=True, backbone=args.backbone)
     model.to(device)
 
-    flood_count = sum(1 for _, l in full_dataset.samples if l == 1)
-    nonflood_count = sum(1 for _, l in full_dataset.samples if l == 0)
+    flood_count = sum(1 for _, l, _ in full_dataset.samples if l == 1)
+    nonflood_count = sum(1 for _, l, _ in full_dataset.samples if l == 0)
     total = flood_count + nonflood_count
     class_weights = torch.tensor([total / nonflood_count, total / flood_count], dtype=torch.float32).to(device)
     criterion_cls = nn.CrossEntropyLoss(weight=class_weights)
+    criterion_depth = nn.L1Loss()
     logger.info(f"Class weights: nonflood={class_weights[0]:.2f}, flood={class_weights[1]:.2f}")
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=0.0001)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
 
     best_val_acc = 0.0
+    best_depth_mae = float("inf")
 
     logger.info(f"Training {args.backbone} for {args.epochs} epochs on {train_size} images")
+    logger.info(f"Weights: cls={args.cls_weight}, depth={args.depth_weight}")
 
     for epoch in range(args.epochs):
-        train_loss, train_acc = train_one_epoch(model, train_loader, criterion_cls, None, optimizer, device)
-        val_loss, val_acc = evaluate(model, val_loader, criterion_cls, device)
+        train_loss, train_acc, train_depth_mae = train_one_epoch(
+            model, train_loader, criterion_cls, criterion_depth, optimizer, device,
+            cls_weight=args.cls_weight, depth_weight=args.depth_weight
+        )
+        val_loss, val_acc, val_depth_mae = evaluate(model, val_loader, criterion_cls, device)
         scheduler.step()
 
         logger.info(
             f"Epoch {epoch+1}/{args.epochs} | "
-            f"Train Loss: {train_loss:.4f} Acc: {train_acc:.4f} | "
-            f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f}"
+            f"Train Loss: {train_loss:.4f} Acc: {train_acc:.4f} DepthMAE: {train_depth_mae:.2f}cm | "
+            f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f} DepthMAE: {val_depth_mae:.2f}cm"
         )
 
         if val_acc > best_val_acc and args.save_best:
             best_val_acc = val_acc
+            best_depth_mae = val_depth_mae
             checkpoint = {
                 "model_state_dict": model.state_dict(),
                 "backbone": args.backbone,
                 "num_classes": 2,
                 "val_acc": val_acc,
+                "val_depth_mae": val_depth_mae,
                 "epoch": epoch + 1,
             }
             save_path = CHECKPOINT_DIR / "best.pt"
             torch.save(checkpoint, save_path)
-            logger.info(f"Saved best model to {save_path} (val_acc={val_acc:.4f})")
+            logger.info(f"Saved best model to {save_path} (val_acc={val_acc:.4f}, depth_mae={val_depth_mae:.2f}cm)")
 
-    logger.info(f"Training complete. Best val accuracy: {best_val_acc:.4f}")
+    logger.info(f"Training complete. Best val accuracy: {best_val_acc:.4f}, Depth MAE: {best_depth_mae:.2f}cm")
 
 
 if __name__ == "__main__":

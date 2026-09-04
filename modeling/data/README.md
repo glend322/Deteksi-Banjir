@@ -54,27 +54,25 @@
 - **Content:** Current weather conditions + forecast
 - **Purpose:** Real-time rainfall input for detection pipeline
 
-### Kaggle Summaries
-- **Files:** `flood_summary.json`, `train_summary.json`, `test_summary.json`
-- **Content:** Column descriptions, sample rows, statistics
-- **Purpose:** Data exploration, feature engineering reference
+
 
 ## Training Data (data/training/)
 
 ### Flood Images
 - **Directory:** `training/flood/`
-- **Source:** Kaggle flood segmentation dataset
-- **Count:** ~100 images (224x224)
+- **Source:** Kaggle flood segmentation dataset + synthetic augmented
+- **Count:** 439 images (224x224)
+  - 289 original flood images from Kaggle
+  - 150 augmented images (water-color overlay on non-flood images)
 - **Purpose:** Positive class for CV flood detection model
 
-### Non-Flood Images (Semarang City Streets)
+### Non-Flood Images (Street View)
 - **Directory:** `training/nonflood/`
-- **Source:** Pantau Semarang CCTV (pantausemar.semarangkota.go.id)
-- **Categories:** rawan_genangan, sungai, pompa_air
-- **Content:** Normal street/road images from Semarang city cameras
-- **Processing:** Resized to 224x224, augmented with color/brightness variations
-- **Purpose:** Negative class for CV flood detection model (Semarang-specific)
-- **Note:** Images captured during non-flood conditions from Semarang CCTV streams
+- **Source:** Google Street View dataset (Kaggle: paulchambaz/google-street-view)
+- **Count:** 300 images
+- **Content:** Street-level images of roads, buildings, urban areas from various cities
+- **Selection:** Filtered from 10,000 images based on sharpness, brightness, color diversity, and file size
+- **Purpose:** Negative class for CV flood detection model
 
 ## Sample Data (data/sample/)
 

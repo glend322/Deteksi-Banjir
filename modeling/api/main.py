@@ -17,6 +17,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import torch
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
@@ -63,7 +64,6 @@ def _run_cv_inference(frame_bytes: bytes) -> dict:
     with torch.no_grad():
         out = model(tensor)
 
-    import torch
     probs = torch.softmax(out["logits"], dim=1).cpu().numpy()[0]
     depth_cm = float(out["depth_cm"].cpu().numpy()[0])
     depth_cm = max(0.0, min(depth_cm, 200.0))
