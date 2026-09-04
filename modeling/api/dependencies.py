@@ -21,7 +21,7 @@ def get_cv_model():
     if _cv_model is not None:
         return _cv_model, _cv_device
 
-    from cv_model import FloodClassifier
+    from flood_detection.cv_model import FloodClassifier
 
     _cv_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     ckpt_path = CHECKPOINT_DIR / "best.pt"

@@ -60,10 +60,8 @@
 
 ### Flood Images
 - **Directory:** `training/flood/`
-- **Source:** Kaggle flood segmentation dataset + synthetic augmented
-- **Count:** 439 images (224x224)
-  - 289 original flood images from Kaggle
-  - 150 augmented images (water-color overlay on non-flood images)
+- **Source:** Kaggle flood segmentation dataset
+- **Count:** 289 images (224x224)
 - **Purpose:** Positive class for CV flood detection model
 
 ### Non-Flood Images (Street View)

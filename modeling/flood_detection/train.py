@@ -218,7 +218,7 @@ def main():
     parser.add_argument("--depth_weight", type=float, default=0.3, help="Depth loss weight")
     args = parser.parse_args()
 
-    from cv_model import FloodClassifier
+    from flood_detection.cv_model import FloodClassifier
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logger.info(f"Using device: {device}")

@@ -22,7 +22,7 @@ import torch
 from PIL import Image
 from torchvision import transforms
 
-ROOT_DIR = Path(__file__).parent
+ROOT_DIR = Path(__file__).parent.parent
 
 logging.basicConfig(
     level=logging.INFO,
@@ -82,9 +82,9 @@ class FloodDetectionPipeline:
         self._initialized = False
 
     def _init(self):
-        from cctv_client import CCTVClient
-        from verifier import FalsePositiveFilter
-        from cv_model import FloodClassifier
+        from flood_detection.cctv_client import CCTVClient
+        from flood_detection.verifier import FalsePositiveFilter
+        from flood_detection.cv_model import FloodClassifier
 
         logger.info("Initializing pipeline components...")
 
@@ -115,7 +115,7 @@ class FloodDetectionPipeline:
         logger.info("Pipeline initialized successfully")
 
     def _run_cv_inference(self, frame_bytes: bytes) -> dict:
-        from cv_model import CLASS_NAMES, depth_to_classification
+        from flood_detection.cv_model import CLASS_NAMES, depth_to_classification
 
         img = Image.open(io.BytesIO(frame_bytes)).convert("RGB")
         transform = transforms.Compose([
@@ -174,7 +174,7 @@ class FloodDetectionPipeline:
                 frame_bytes, cv_result, cam_key
             )
 
-            from area_mapping import get_area_name
+            from safe_route.area_mapping import get_area_name
             area_name = get_area_name(camera.lat, camera.lng)
 
             final_confidence = max(0.0, min(1.0, cv_result["confidence"] + conf_mod))
@@ -186,7 +186,7 @@ class FloodDetectionPipeline:
                 and cv_result["depth_estimate_cm"] >= 10
             )
 
-            from classifier import classify_flood
+            from flood_detection.classifier import classify_flood
             if is_flood:
                 cls_result = classify_flood(cv_result["depth_estimate_cm"], area_name)
             else:

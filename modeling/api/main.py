@@ -109,10 +109,10 @@ async def classify_image(file: UploadFile = File(...)):
 
 @app.post("/api/scan-cctv", response_model=CCTVScanResponse)
 async def scan_cctv(req: CCTVScanRequest):
-    from cctv_client import CCTVClient
-    from verifier import FalsePositiveFilter
-    from area_mapping import get_area_name
-    from classifier import classify_flood
+    from flood_detection.cctv_client import CCTVClient
+    from flood_detection.verifier import FalsePositiveFilter
+    from safe_route.area_mapping import get_area_name
+    from flood_detection.classifier import classify_flood
     import asyncio
 
     client = CCTVClient(
@@ -220,8 +220,8 @@ async def scan_cctv(req: CCTVScanRequest):
 
 @app.post("/api/calculate-route", response_model=RouteCalculateResponse)
 async def calculate_route(req: RouteCalculateRequest):
-    from route_engine import calculate_safe_routes
-    from evacuation_finder import find_nearest_evacuation
+    from safe_route.route_engine import calculate_safe_routes
+    from safe_route.evacuation_finder import find_nearest_evacuation
 
     flood_zones = []
 
@@ -277,7 +277,7 @@ async def calculate_route(req: RouteCalculateRequest):
 
 @app.get("/api/flood-zones", response_model=FloodZoneResponse)
 async def get_flood_zones():
-    from area_mapping import get_area_name
+    from safe_route.area_mapping import get_area_name
 
     zones = []
 
@@ -286,5 +286,5 @@ async def get_flood_zones():
 
 @app.get("/api/evacuation-points")
 async def get_evacuation_points():
-    from evacuation_finder import get_all_evacuation_points
+    from safe_route.evacuation_finder import get_all_evacuation_points
     return get_all_evacuation_points()
