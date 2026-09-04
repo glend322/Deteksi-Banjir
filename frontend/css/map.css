@@ -1,0 +1,233 @@
+/* ==========================================================================
+   SafeRoute - Map Component Styling (Leaflet, Controls, Legend, Pills)
+   ========================================================================== */
+
+.map-viewport {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    background-color: #E2E8F0;
+    z-index: 10;
+}
+
+/* Floating Risk Filter Pills */
+.filter-pills-bar {
+    position: absolute;
+    top: 20px;
+    left: 24px;
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    padding: 6px;
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-floating);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    max-width: calc(100% - 48px);
+    overflow-x: auto;
+}
+
+.pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: transparent;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+}
+
+.pill-btn:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--text-primary);
+}
+
+.pill-btn.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.pill-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.pill-indicator.safe { background-color: var(--status-safe); }
+.pill-indicator.watch { background-color: var(--status-watch); }
+.pill-indicator.flooded { background-color: var(--status-flooded); }
+.pill-indicator.impassable { background-color: var(--status-danger); }
+
+/* Floating Map Controls (Zoom & GPS) */
+.map-actions-group {
+    position: absolute;
+    right: 24px;
+    bottom: 32px;
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.map-circle-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-md);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 800;
+    transition: all var(--transition-fast);
+}
+
+.map-circle-btn:hover {
+    background: #FFFFFF;
+    color: var(--primary);
+    transform: scale(1.05);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Floating Risk Legend Box */
+.legend-box {
+    position: absolute;
+    left: 24px;
+    bottom: 32px;
+    z-index: 400;
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    box-shadow: var(--shadow-md);
+    font-size: 12px;
+}
+
+.legend-title {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.legend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* Mobile Bottom Card: Status Risiko Sekitar */
+.mobile-bottom-card {
+    display: none;
+    position: absolute;
+    bottom: 86px;
+    left: 16px;
+    right: 16px;
+    z-index: 450;
+    background: var(--surface-glass);
+    backdrop-filter: blur(16px);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: var(--shadow-floating);
+}
+
+.mobile-bottom-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.mobile-card-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.mobile-card-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.mobile-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.mobile-stat-box {
+    background: white;
+    border-radius: var(--radius-sm);
+    padding: 8px 6px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    box-shadow: var(--shadow-xs);
+}
+
+.mobile-stat-icon {
+    font-size: 14px;
+}
+
+.mobile-stat-label {
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.mobile-stat-count {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+@media (max-width: 900px) {
+    .mobile-bottom-card {
+        display: block;
+    }
+
+    .legend-box {
+        display: none;
+    }
+
+    .filter-pills-bar {
+        top: 12px;
+        left: 12px;
+        max-width: calc(100% - 24px);
+    }
+
+    .map-actions-group {
+        right: 16px;
+        bottom: 210px;
+    }
+}

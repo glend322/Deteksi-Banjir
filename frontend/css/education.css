@@ -1,0 +1,43 @@
+/* ==========================================================================
+   SafeRoute - Disaster Education & Guidelines Styling
+   ========================================================================== */
+
+.education-section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.education-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.education-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.education-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    background: #F8FAFC;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+
+.education-bullet {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary);
+    margin-top: 6px;
+    flex-shrink: 0;
+}

@@ -1,0 +1,133 @@
+<!-- ==========================================================================
+     SafeRoute Component: Fitur Beranda (Dashboard Utama)
+     ========================================================================== -->
+<section id="berandaView" class="view-pane active">
+    <div class="beranda-container">
+
+        <!-- 1. Hero Emergency Broadcast Banner -->
+        <div id="berandaHeroWrap"></div>
+
+        <!-- 2. KPI Quick Stats Bar -->
+        <div class="beranda-stats-grid" id="berandaKpiGrid"></div>
+
+        <!-- 3. Direktori Kontak & Lembaga Penanganan Darurat (FITUR UTAMA) -->
+        <div class="beranda-section">
+            <div class="section-head-row">
+                <div class="section-title-wrap">
+                    <h2 class="section-title">
+                        <span>📞</span>
+                        Kontak & Lembaga Penanganan Darurat
+                    </h2>
+                    <p class="section-subtitle">Panggilan darurat 24 jam bebas pulsa, penanganan evakuasi perahu karet, dan posko resmi Kota Semarang.</p>
+                </div>
+                <span class="section-action-link" onclick="app.openModal('modalEducation')">
+                    Buka Panduan Lengkap
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </span>
+            </div>
+
+            <!-- Filter Chips -->
+            <div class="contacts-filter-bar">
+                <button type="button" class="contact-filter-chip active" data-category="all">Semua Kontak</button>
+                <button type="button" class="contact-filter-chip" data-category="emergency">🚨 Darurat Bebas Pulsa (112)</button>
+                <button type="button" class="contact-filter-chip" data-category="rescue">🚤 Evakuasi & BPBD / SAR</button>
+                <button type="button" class="contact-filter-chip" data-category="water_pump">⚙️ Pompa & Drainase (Dinas PU)</button>
+                <button type="button" class="contact-filter-chip" data-category="medical">🩺 Medis & Ambulans (PMI)</button>
+                <button type="button" class="contact-filter-chip" data-category="police">👮 Lalu Lintas & Derek (Polrestabes)</button>
+            </div>
+
+            <!-- Contacts Grid -->
+            <div class="contacts-grid" id="berandaContactsGrid"></div>
+        </div>
+
+        <!-- 4. Widgets Pendukung Dashboard (TMA, Pompa, Cuaca, Shelter, Panduan, Feed) -->
+        <div class="two-col-dashboard-grid">
+
+            <!-- Kolom Kiri: Sensor TMA & Posko Evakuasi -->
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+
+                <!-- Telemetri Ketinggian Muka Air & Pompa -->
+                <div class="dashboard-panel-card">
+                    <div class="section-head-row">
+                        <div class="section-title-wrap">
+                            <h3 class="section-title" style="font-size: 16px;">
+                                <span>🌊</span>
+                                Telemetri Muka Air Sungai & Rumah Pompa
+                            </h3>
+                            <p class="section-subtitle">Data sensor hidrologi dan status operasi pompa pengendali banjir Kota Semarang</p>
+                        </div>
+                        <span style="font-size: 11px; font-weight: 700; color: var(--status-safe); background: var(--status-safe-bg); padding: 3px 8px; border-radius: 6px;">● Live Sensor IoT</span>
+                    </div>
+                    <div class="sensor-list" id="berandaSensorsList"></div>
+                </div>
+
+                <!-- Posko Pengungsian & Fasilitas Evakuasi -->
+                <div class="dashboard-panel-card">
+                    <div class="section-head-row">
+                        <div class="section-title-wrap">
+                            <h3 class="section-title" style="font-size: 16px;">
+                                <span>⛺</span>
+                                Kapasitas Posko Evakuasi & Pengungsian
+                            </h3>
+                            <p class="section-subtitle">Daftar posko penampungan warga terverifikasi siap logistik dan medis</p>
+                        </div>
+                        <span class="section-action-link" onclick="app.switchView('peta')">Tampilkan di Peta ></span>
+                    </div>
+                    <div class="shelter-card-list" id="berandaSheltersGrid"></div>
+                </div>
+
+            </div>
+
+            <!-- Kolom Kanan: Cuaca BMKG, Panduan Kendaraan, Feed Warga -->
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+
+                <!-- Prakiraan Cuaca 24 Jam -->
+                <div class="dashboard-panel-card">
+                    <div class="section-head-row">
+                        <div class="section-title-wrap">
+                            <h3 class="section-title" style="font-size: 16px;">
+                                <span>⛅</span>
+                                Prakiraan Cuaca & Hujan BMKG
+                            </h3>
+                            <p class="section-subtitle">Proyeksi pergerakan awan konvektif dan curah hujan hulu</p>
+                        </div>
+                        <span class="section-action-link" onclick="app.openModal('modalWeather')">Detail BMKG ></span>
+                    </div>
+                    <div class="weather-card-inner" id="berandaWeatherInner"></div>
+                </div>
+
+                <!-- Infografis Batas Kendaraan -->
+                <div class="dashboard-panel-card">
+                    <div class="section-head-row">
+                        <div class="section-title-wrap">
+                            <h3 class="section-title" style="font-size: 16px;">
+                                <span>🚗</span>
+                                Batas Aman Kendaraan Menembus Genangan
+                            </h3>
+                            <p class="section-subtitle">Rekomendasi toleransi kedalaman air agar mesin tidak mogok</p>
+                        </div>
+                    </div>
+                    <div class="vehicle-wading-grid" id="berandaVehicleWadingGrid"></div>
+                </div>
+
+                <!-- Feed Laporan Warga Terkini -->
+                <div class="dashboard-panel-card">
+                    <div class="section-head-row">
+                        <div class="section-title-wrap">
+                            <h3 class="section-title" style="font-size: 16px;">
+                                <span>📢</span>
+                                Aktivitas Laporan Komunitas Terverifikasi AI
+                            </h3>
+                            <p class="section-subtitle">Laporan kondisi genangan jalan langsung dari pengendara di Semarang</p>
+                        </div>
+                        <span class="section-action-link" onclick="app.openModal('modalReport')">+ Lapor Cepat</span>
+                    </div>
+                    <div class="community-feed-list" id="berandaCommunityFeed"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</section>

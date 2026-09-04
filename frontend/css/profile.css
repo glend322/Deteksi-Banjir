@@ -1,0 +1,67 @@
+/* ==========================================================================
+   SafeRoute - Profile & Settings Component Styling
+   ========================================================================== */
+
+.profile-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.profile-avatar-large {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary-light);
+}
+
+.profile-name {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.profile-email {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.settings-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    background: #F8FAFC;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+}
+
+.settings-item-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-primary);
+}
+
+.settings-item-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.settings-select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-weight: 700;
+    font-size: 12px;
+    background: white;
+    outline: none;
+}

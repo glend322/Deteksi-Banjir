@@ -1,0 +1,78 @@
+<!-- ==========================================================================
+     SafeRoute Component: Topbar Header & Mobile Appbar
+     ========================================================================== -->
+<!-- Desktop Topbar Header -->
+<header class="topbar">
+    <div class="search-box-wrapper">
+        <span class="search-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.3-4.3"/>
+            </svg>
+        </span>
+        <input type="text" class="search-input" placeholder="Cari jalan, titik banjir, atau posko di Semarang...">
+    </div>
+
+    <div class="topbar-right">
+        <!-- Preview Device View Toggle -->
+        <button id="btnToggleDevice" class="device-toggle-btn" type="button" title="Uji Tampilan Android Mobile">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect width="14" height="20" x="5" y="2" rx="2"/>
+                <path d="M12 18h.01"/>
+            </svg>
+            Tampilan Mobile
+        </button>
+
+        <!-- BMKG Weather Widget -->
+        <div class="weather-widget" id="weatherWidgetBtn" onclick="app.openModal('modalWeather')">
+            <span class="weather-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/>
+                    <path d="M16 14v6"/>
+                    <path d="M8 14v6"/>
+                    <path d="M12 16v6"/>
+                </svg>
+            </span>
+            <div class="weather-info">
+                <span class="weather-city">
+                    Semarang
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </span>
+                <span class="weather-text">Hujan Ringan • 27°C</span>
+            </div>
+        </div>
+
+        <!-- User Profile -->
+        <div class="user-profile" onclick="app.openModal('modalProfile')">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80" alt="Avatar" class="user-avatar">
+            <span class="user-name">
+                Andi Pratama
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+        </div>
+    </div>
+</header>
+
+<!-- Mobile Appbar (Visible on small screens) -->
+<div class="mobile-appbar">
+    <div class="mobile-city-selector" onclick="app.openModal('modalWeather')">
+        <div class="mobile-city-title">
+            Kota Semarang
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="mobile-weather-sub">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/></svg>
+            Hujan Ringan • 27°C
+        </div>
+    </div>
+
+    <div class="mobile-appbar-actions">
+        <button class="icon-badge-btn" onclick="app.openModal('modalAlerts')" aria-label="Peringatan">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+            </svg>
+            <span class="badge-dot"></span>
+        </button>
+    </div>
+</div>

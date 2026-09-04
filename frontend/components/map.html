@@ -1,0 +1,103 @@
+<!-- ==========================================================================
+     SafeRoute Component: Fitur Peta Interaktif
+     ========================================================================== -->
+<section id="mapView" class="view-pane">
+    <div class="map-viewport">
+
+        <!-- Floating Risk Filter Pills -->
+        <div class="filter-pills-bar">
+            <button class="pill-btn active" data-filter="all" type="button">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                Semua Risiko
+            </button>
+            <button class="pill-btn" data-filter="safe" type="button">
+                <span class="pill-indicator safe"></span>
+                Aman
+            </button>
+            <button class="pill-btn" data-filter="watch" type="button">
+                <span class="pill-indicator watch"></span>
+                Waspada
+            </button>
+            <button class="pill-btn" data-filter="flooded" type="button">
+                <span class="pill-indicator flooded"></span>
+                Tergenang
+            </button>
+            <button class="pill-btn" data-filter="impassable" type="button">
+                <span class="pill-indicator impassable"></span>
+                Tidak Dapat Dilalui
+            </button>
+        </div>
+
+        <!-- Leaflet Map Canvas -->
+        <div id="map"></div>
+
+        <!-- Floating Map Controls -->
+        <div class="map-actions-group">
+            <button id="btnZoomIn" class="map-circle-btn" type="button" title="Perbesar Peta">+</button>
+            <button id="btnZoomOut" class="map-circle-btn" type="button" title="Perkecil Peta">-</button>
+            <button id="btnRecenter" class="map-circle-btn" type="button" title="Pusatkan Lokasi Saya">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Floating Risk Legend Box -->
+        <div class="legend-box">
+            <div class="legend-title">Legenda Titik & Poligon</div>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <span class="pill-indicator safe"></span>
+                    <span>Aman (Bebas Banjir)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="pill-indicator watch"></span>
+                    <span>Waspada (10–20 cm)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="pill-indicator flooded"></span>
+                    <span>Tergenang (20–40 cm)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="pill-indicator impassable"></span>
+                    <span>Tidak Dapat Dilalui (>40 cm)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Bottom Card: Status Risiko di Sekitar Anda -->
+        <div class="mobile-bottom-card" id="mobileRiskCard">
+            <div class="mobile-bottom-card-header">
+                <div>
+                    <div class="mobile-card-title">Status Risiko di Sekitar Anda</div>
+                    <div class="mobile-card-sub">Diperbarui 5 menit lalu</div>
+                </div>
+                <a href="#" style="font-size: 11px; font-weight: 700; color: var(--primary);" onclick="app.openModal('modalAlerts')">Lihat Semua ></a>
+            </div>
+
+            <div class="mobile-stat-grid">
+                <div class="mobile-stat-box" style="border-top: 3px solid var(--status-safe);">
+                    <span class="mobile-stat-icon">🟢</span>
+                    <span class="mobile-stat-label" style="color: var(--status-safe);">Aman</span>
+                    <span class="mobile-stat-count">12 area</span>
+                </div>
+                <div class="mobile-stat-box" style="border-top: 3px solid var(--status-watch);">
+                    <span class="mobile-stat-icon">🟡</span>
+                    <span class="mobile-stat-label" style="color: var(--status-watch);">Waspada</span>
+                    <span class="mobile-stat-count">7 area</span>
+                </div>
+                <div class="mobile-stat-box" style="border-top: 3px solid var(--status-flooded);">
+                    <span class="mobile-stat-icon">🟠</span>
+                    <span class="mobile-stat-label" style="color: var(--status-flooded);">Tergenang</span>
+                    <span class="mobile-stat-count">5 area</span>
+                </div>
+                <div class="mobile-stat-box" style="border-top: 3px solid var(--status-danger);">
+                    <span class="mobile-stat-icon">🔴</span>
+                    <span class="mobile-stat-label" style="color: var(--status-danger);">Tidak Bisa</span>
+                    <span class="mobile-stat-count">2 area</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>

@@ -1,0 +1,81 @@
+<!-- ==========================================================================
+     SafeRoute Component: Detail Lokasi Drawer
+     ========================================================================== -->
+<aside id="detailDrawer" class="detail-drawer">
+    <div class="drawer-header">
+        <h3>Detail Lokasi</h3>
+        <button id="btnCloseDrawer" class="btn-close-drawer" type="button" aria-label="Tutup Detail">&times;</button>
+    </div>
+
+    <div class="drawer-content">
+        <!-- Status Badge -->
+        <div id="drawerStatusBadge" class="status-pill-badge danger">
+            <span class="pill-indicator impassable"></span>
+            <span>Tidak Dapat Dilalui</span>
+        </div>
+
+        <!-- Location Titles -->
+        <div>
+            <h2 id="drawerTitle" class="drawer-location-title">Jl. Kaligawe Raya</h2>
+            <div id="drawerSubtitle" class="drawer-location-subtitle">Genuk, Semarang</div>
+        </div>
+
+        <!-- Metric List -->
+        <div class="metric-list">
+            <div class="metric-row">
+                <span class="metric-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                    Kedalaman Air
+                </span>
+                <span id="drawerDepth" class="metric-val highlight">60 cm</span>
+            </div>
+
+            <div class="metric-row">
+                <span class="metric-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    Status
+                </span>
+                <span id="drawerStatus" class="metric-val">Tidak Dapat Dilalui</span>
+            </div>
+
+            <div class="metric-row">
+                <span class="metric-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Terakhir Diperbarui
+                </span>
+                <span id="drawerUpdated" class="metric-val">10 menit lalu</span>
+            </div>
+
+            <div class="metric-row">
+                <span class="metric-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    Sumber Data
+                </span>
+                <span id="drawerSource" class="metric-val">CCTV Dinas PU</span>
+            </div>
+        </div>
+
+        <!-- CCTV Photo -->
+        <div class="cctv-preview-card">
+            <div class="cctv-overlay-tag">
+                <span class="cctv-live-dot"></span>
+                CAM 04 • JL. KALIGAWE
+            </div>
+            <img id="drawerCctvImage" src="assets/cctv_kaligawe.jpg" alt="Pantauan Banjir CCTV" class="cctv-img">
+        </div>
+
+        <!-- Rekomendasi Box -->
+        <div class="recommendation-box">
+            <div class="recommendation-title">Rekomendasi Rute</div>
+            <div id="drawerRecommendation" class="recommendation-text">
+                Hindari rute ini. Gunakan rute alternatif yang tersedia via Tol Gayamsari.
+            </div>
+        </div>
+
+        <!-- Action Button -->
+        <button id="btnViewRoute" class="btn-view-route" type="button">
+            Lihat Rute Alternatif
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </button>
+    </div>
+</aside>
