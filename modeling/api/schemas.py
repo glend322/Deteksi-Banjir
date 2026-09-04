@@ -1,83 +1,144 @@
+"""
+FastAPI Schemas — Pydantic Models
+
+Matches output contract from js/data.js (SAFEROUTE_DATA).
+"""
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from enum import Enum
 
 
-class Severity(str, Enum):
-    normal = "normal"
-    waspada = "waspada"
-    tergenang = "tergenang"
-    tidak_dapat_dilalui = "tidak_dapat_dilalui"
+class FloodStatus(str, Enum):
+    safe = "safe"
+    watch = "watch"
+    flooded = "flooded"
+    impassable = "impassable"
 
 
-class VerificationStatus(str, Enum):
-    verified = "verified"
-    unverified = "unverified"
-    flagged = "flagged"
+class Classification(str, Enum):
+    dangkal = "dangkal"
+    sedang = "sedang"
+    dalam = "dalam"
 
 
 # --- CV Classifier ---
 
 class CVResult(BaseModel):
     flood_detected: bool
-    severity: Severity
-    depth_range: str = Field(..., example="40-70cm")
+    classification: str = Field(..., example="dangkal")
     depth_estimate_cm: float = Field(..., ge=0, le=300)
     confidence: float = Field(..., ge=0, le=1)
-    bounding_boxes: List[List[float]] = []
 
 
-# --- Predictive Model ---
+# --- CCTV Scan ---
 
-class FloodPrediction(BaseModel):
-    area_id: str
+class CCTVScanRequest(BaseModel):
+    categories: Optional[List[str]] = None
+    camera_ids: Optional[List[int]] = None
+
+
+class CCTVFrameResult(BaseModel):
+    camera_id: int
+    camera_name: str
     lat: float
     lng: float
-    flood_probability: float = Field(..., ge=0, le=1)
-    predicted_depth_range: str
-    time_window: str
-    confidence: float = Field(..., ge=0, le=1)
-    risk_level: Severity
+    stream_url: str
+    flood_detected: bool
+    classification: str
+    depth_estimate_cm: float
+    confidence: float
+    area_name: str
+    notification: str
+    status: str
+    status_label: str
+    color: str
+    false_positive_filtered: bool
+    filter_reasons: List[str] = []
+    frame_timestamp: float
 
 
-class PredictRequest(BaseModel):
-    area_id: Optional[str] = None
-    lat: Optional[float] = None
-    lng: Optional[float] = None
-    time_window: str = "3h"
+class CCTVScanResponse(BaseModel):
+    timestamp: float
+    total_cameras: int
+    scanned_cameras: int
+    successful_frames: int
+    failed_frames: int
+    detections: List[CCTVFrameResult]
 
 
-# --- Report Verification ---
+# --- Route Calculation ---
 
-class ReportInput(BaseModel):
-    report_id: str
+class Coordinate(BaseModel):
     lat: float
     lng: float
-    timestamp: str
+    name: Optional[str] = None
+
+
+class RouteCalculateRequest(BaseModel):
+    origin: Coordinate
+    destination: Coordinate
+    vehicle_max_depth_cm: Optional[float] = 30.0
+
+
+class RoadLabel(BaseModel):
+    segment: str
+    status: str
+    color: str
+    depth_cm: float = 0.0
+
+
+class RouteOption(BaseModel):
+    id: str
+    type: str
+    title: str
+    badge: str
+    duration: str
+    distance: str
+    flood_avoided: str
+    risk_level: str
+    color: str
     description: str
-    photo_path: Optional[str] = None
+    path: List[List[float]]
+    road_labels: List[RoadLabel] = []
 
 
-class VerificationResult(BaseModel):
-    report_id: str
-    verification_status: VerificationStatus
-    confidence_score: float = Field(..., ge=0, le=1)
-    flags: List[str] = []
-    estimated_depth: Optional[str] = None
-
-
-# --- Flood Zone (for map) ---
-
-class FloodZone(BaseModel):
+class EvacuationResult(BaseModel):
     id: str
     name: str
     lat: float
     lng: float
-    depth: float
-    status: Severity
+    distance_km: float
+    duration_walk: str
+    capacity: str
+    contact: str
+    status: str
+
+
+class RouteCalculateResponse(BaseModel):
+    origin: str
+    destination: str
+    flood_zones_active: int
+    options: List[RouteOption]
+    nearest_evacuation: Optional[EvacuationResult] = None
+
+
+# --- Flood Zone ---
+
+class FloodZone(BaseModel):
+    id: str
+    name: str
+    area: str
+    lat: float
+    lng: float
+    status: FloodStatus
+    status_label: str
+    depth_cm: float
     confidence: float
-    last_updated: str
     source: str
+    classification: str = ""
+    notification: str = ""
+    last_updated: str
+    color: str
 
 
 class FloodZoneResponse(BaseModel):

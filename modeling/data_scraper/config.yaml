@@ -1,0 +1,17 @@
+# Data Scraper Config
+bmkg:
+  api_url: "https://api.bmkg.go.id/publik/prakiraan-cuaca"
+  area_id: "501210"  # Semarang
+  rate_limit_rps: 0.5
+  cache_max_age_hours: 24
+
+osm:
+  overpass_url: "https://overpass-api.de/api/interpreter"
+  bbox: "-7.10,110.30,-6.90,110.55"  # Semarang area
+  rate_limit_rps: 0.5
+  timeout: 90
+
+kaggle:
+  datasets:
+    - "naiyakhalid/flood-prediction-dataset"
+  output_dir: "../data/raw"

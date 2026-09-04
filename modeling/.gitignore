@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+checkpoints/*.pt
+checkpoints/*.pth
+data/raw/
+data/processed/
+*.egg-info/
+dist/
+build/
+.vscode/
+.idea/

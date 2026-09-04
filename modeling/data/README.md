@@ -1,92 +1,94 @@
 # Data Documentation
 
-All datasets used in the modeling pipeline.
+## Raw Data (data/raw/)
 
----
-
-## Scraped Datasets (Raw)
-
-### Rainfall Data — Open-Meteo API
-- **Source:** https://api.open-meteo.com (free, no API key)
-- **License:** CC BY 4.0 (Open-Meteo)
-- **Size:** 210,528 hourly records, 12 areas
-- **Date Range:** 2024-09-03 to 2026-09-03 (2 years)
-- **Parameters:** precipitation (mm), rain (mm)
-- **Areas:** Kaligawe, Genuk, Semarang Utara, Tambakrejo, Mangkang, Gayamsari, Simpang Lima, Tembalang, Tugu, Genuk Indah, Kleweran, Sunter
-- **Files:** `raw/rainfall/semarang_rainfall_historical.csv`, `raw/rainfall/semarang_rainfall_summary.csv`, `raw/rainfall/forecast_*.json`
-
-### Elevation Data — Open-Meteo Elevation API
-- **Source:** https://api.open-meteo.com/v1/elevation (free, no API key)
-- **License:** CC BY 4.0
-- **Size:** 2,025 grid points
-- **Resolution:** ~0.5 km grid
-- **Elevation Range:** 0m – 235m (mean: 114.43m)
-- **Files:** `raw/dem/semarang_elevation_grid.csv`, `raw/dem/elevation_stats.json`
-
-### OpenStreetMap Features — Overpass API
-- **Source:** https://overpass-api.de (OpenStreetMap)
-- **License:** ODbL (Open Database License)
-- **Area:** Kota Semarang bounding box (-7.05 to -6.85 lat, 110.35 to 110.55 lng)
+### Kaggle Flood Prediction Dataset
+- **Source:** https://www.kaggle.com/datasets/naiyakhalid/flood-prediction-dataset
+- **License:** CC0: Public Domain
 - **Files:**
-  - `raw/osm/waterways.csv` — 367 waterways (rivers, canals, drains)
-  - `raw/osm/land_use.csv` — 1,877 land use areas
-  - `raw/osm/water_bodies.csv` — 234 water bodies
-  - `raw/osm/roads.csv` — 23,600 roads
-  - `raw/osm/flood_features.csv` — 544 flood-related features
-  - `raw/osm/summary.json` — Counts summary
+  - `flood.csv`: 50,000 rows x 21 columns (main dataset)
+  - `train.csv`: 1,117,957 rows x 22 columns (training split)
+  - `test.csv`: 745,305 rows x 21 columns (test split)
+  - `sample_submission.csv`: 745,305 rows x 2 columns
+- **Columns:** MonsoonIntensity, TopographyDrainage, RiverManagement, Deforestation, Urbanization, ClimateChange, DamsQuality, Siltation, AgriculturalPractices, Encroachments, IneffectiveDisasterPreparedness, DrainageSystems, CoastalVulnerability, Landslides, Watersheds, DeterioratingInfrastructure, PopulationScore, WetlandLoss, InadequatePlanning, PoliticalFactors, FloodProbability
+- **Purpose:** Feature engineering for flood risk prediction model
 
-### Kaggle Flood Images
-- **Source:** Kaggle (requires API key)
-- **Status:** Not downloaded yet (needs KAGGLE_USERNAME and KAGGLE_KEY)
-- **Recommended datasets:** ritvik1909/flood-detection, anshitagarwal/flood-image-dataset
-- **Files:** `raw/kaggle/` (empty)
+### OSM Data (OpenStreetMap)
+- **Source:** Overpass API (https://overpass-api.de/)
+- **Bounding Box:** -7.10,110.30,-6.90,110.55 (Semarang area)
+- **Files:**
+  - `osm_roads.json`: 209,137 elements (roads network)
+  - `osm_waterways.json`: 26,777 elements (rivers, streams)
+  - `osm_drainage.json`: 2,982 elements (drainage channels)
+  - `osm_land_use.json`: 106,781 elements (land use zones)
+- **Purpose:** Routing graph, flood risk features, drainage analysis
 
----
+### BMKG Weather Data
+- **Source:** BMKG API (sample data - API returned 404)
+- **File:** `bmkg_weather.json`
+- **Content:** Current weather + hourly forecast for Semarang
+- **Purpose:** Rainfall data for flood prediction
 
-## Processed Datasets (ML-Ready)
+## Processed Data (data/processed/)
 
-### Daily Features
-- **Source:** Derived from rainfall + DEM + OSM data
-- **Size:** 8,772 rows × 22 columns
-- **Rows:** 12 areas × 731 days
-- **Features:**
-  - `area_id`, `area_name`, `lat`, `lng`, `date`
-  - `total_precipitation` — daily total (mm)
-  - `max_hourly_precipitation` — peak hourly rainfall
-  - `rainy_hours` — hours with rain > 0.5mm
-  - `precipitation_std` — hourly variability
-  - `precip_sum_1d`, `precip_sum_3d`, `precip_sum_7d` — rolling sums
-  - `precip_max_3d` — max hourly precip in last 3 days
-  - `elevation_m` — area elevation (unique per area)
-  - `drainage_density` — count of waterways within 1km radius
-  - `nearest_water_body_dist` — distance to nearest water body
-  - `flood_feature_count` — count of flood-related features within 1km
-  - `landuse_{residential,commercial,industrial,farmland,forest}_count` — land use counts within 2km
-- **Preprocessing:** Area coordinates assigned from real Semarang kecamatan locations
-- **File:** `processed/daily_features.csv`
+### Road Graph
+- **File:** `roads_graph.json` (1.6 MB)
+- **Content:** 5,000 road segments with coordinates
+- **Fields:** id, name, highway type, coords [[lat, lng], ...]
+- **Purpose:** Route calculation engine input
 
-### Flood Targets
-- **Source:** Synthetic labels based on rainfall thresholds
-- **Size:** 8,772 rows
-- **Labels:** normal (8,400), waspada (360), tergenang (12)
-- **Thresholds:** normal < 20mm, waspada 20-50mm, tergenang 50-80mm, tidak_dapat_dilalui > 80mm
-- **File:** `processed/flood_targets.csv`
+### Waterways Graph
+- **File:** `waterways_graph.json` (758 KB)
+- **Content:** 635 waterway segments
+- **Fields:** id, name, waterway type, coords
+- **Purpose:** Flood risk analysis near water bodies
 
-### Geo Features
-- **Source:** OSM + DEM data
-- **Size:** 12 areas (one row per kecamatan)
-- **Features:** elevation, drainage density, water body distance, flood feature count, land use counts
-- **File:** `processed/geo_features.csv`
+### Drainage Graph
+- **File:** `drainage_graph.json` (87 KB)
+- **Content:** 134 drainage channel segments
+- **Fields:** id, name, type, coords
+- **Purpose:** Drainage quality assessment for flood prediction
 
-### Area Elevations
-- **Source:** DEM data mapped to real kecamatan coordinates
-- **Size:** 12 areas with unique lat/lng and elevation
-- **File:** `processed/area_elevations.csv`
+### Weather Current
+- **File:** `weather_current.json`
+- **Content:** Current weather conditions + forecast
+- **Purpose:** Real-time rainfall input for detection pipeline
 
----
+### Kaggle Summaries
+- **Files:** `flood_summary.json`, `train_summary.json`, `test_summary.json`
+- **Content:** Column descriptions, sample rows, statistics
+- **Purpose:** Data exploration, feature engineering reference
 
-## Notes
+## Training Data (data/training/)
 
-- **Synthetic targets:** Flood labels are based on rainfall thresholds, not actual flood incidents. For production, replace with real historical flood data from BPBD.
-- **BMKG alternative:** For official BMKG historical data, register at https://dataonline.bmkg.go.id (free for last 2 years) or request formal data from UPT BMKG.
-- **Class imbalance:** Flood events are rare (12 tergenang out of 8,772 days). Use SMOTE, class weights, or oversampling during training.
+### Flood Images
+- **Directory:** `training/flood/`
+- **Source:** Kaggle flood segmentation dataset
+- **Count:** ~100 images (224x224)
+- **Purpose:** Positive class for CV flood detection model
+
+### Non-Flood Images (Semarang City Streets)
+- **Directory:** `training/nonflood/`
+- **Source:** Pantau Semarang CCTV (pantausemar.semarangkota.go.id)
+- **Categories:** rawan_genangan, sungai, pompa_air
+- **Content:** Normal street/road images from Semarang city cameras
+- **Processing:** Resized to 224x224, augmented with color/brightness variations
+- **Purpose:** Negative class for CV flood detection model (Semarang-specific)
+- **Note:** Images captured during non-flood conditions from Semarang CCTV streams
+
+## Sample Data (data/sample/)
+
+### Test Cameras
+- **File:** `test_cameras.json`
+- **Content:** 8 CCTV cameras with expected flood detection results
+- **Purpose:** Pipeline testing, integration testing
+
+### Flood Zones
+- **File:** `flood_zones.json`
+- **Content:** 4 sample flood zones with severity levels
+- **Purpose:** Route engine testing, map visualization testing
+
+### Test Routes
+- **File:** `test_routes.json`
+- **Content:** 3 route calculation test scenarios
+- **Purpose:** Safe route engine testing
