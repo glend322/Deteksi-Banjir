@@ -17,6 +17,11 @@ class User(Base):
     vehicle_type = Column(String(100), default="Mobil (City Car)") # Motor, Mobil Sedan, Mobil SUV, Truk
     vehicle_max_depth_cm = Column(Integer, default=30) # Batas kedalaman air maksimum
     
+    # Trust Score & Reputasi Pelapor (PRD 6.4)
+    trust_score = Column(Integer, default=50) # Skala 0 - 100 (Default 50 untuk user baru)
+    total_reports = Column(Integer, default=0)
+    verified_reports = Column(Integer, default=0)
+
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

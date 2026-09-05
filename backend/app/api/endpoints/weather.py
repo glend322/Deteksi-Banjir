@@ -7,6 +7,8 @@ from app.models.weather import Alert, WeatherForecastCache
 from app.schemas.weather import WeatherResponse, AlertResponse, EmergencyContact, EducationGuide, HourlyForecast
 
 from app.services.weather_service import fetch_and_update_weather
+from app.services.predictive_service import run_predictive_flood_engine
+from app.services.decay_service import apply_confidence_decay
 
 router = APIRouter()
 
@@ -15,6 +17,20 @@ async def sync_live_weather(db: Session = Depends(get_db)):
     """Memicu pembaruan data cuaca riil Kota Semarang secara langsung."""
     result = await fetch_and_update_weather(db)
     return result
+
+@router.post("/run-predictive-engine", summary="Trigger Prediksi Dini Banjir & Confidence Decay")
+async def trigger_predictive_engine(force_trigger: bool = False, db: Session = Depends(get_db)):
+    """
+    Memicu kalkulasi prediktif hidrologi DAS Semarang hulu -> hilir (PRD 5.4)
+    serta memperbarui confidence decay data banjir (PRD 5.5).
+    """
+    decay_res = apply_confidence_decay(db)
+    predictive_res = await run_predictive_flood_engine(db, force_trigger=force_trigger)
+    return {
+        "status": "success",
+        "decay_summary": decay_res,
+        "predictive_summary": predictive_res
+    }
 
 @router.get("/current", response_model=WeatherResponse)
 def get_current_weather(db: Session = Depends(get_db)):

@@ -6,13 +6,17 @@ from shapely.geometry import Point, mapping
 from typing import List, Optional
 
 from app.core.database import get_db
-from app.models.flood import FloodPoint, FloodZone
+from app.models.flood import FloodPoint, FloodZone, EnvironmentalRiskPoint
 from app.schemas.flood import (
     FloodPointCreate,
     FloodPointResponse,
     FloodZoneResponse,
     RiskSummaryResponse,
-    RiskSummaryItem
+    RiskSummaryItem,
+    EnvironmentalRiskCreate,
+    EnvironmentalRiskResponse,
+    EnvironmentalRiskSummaryResponse,
+    EnvironmentalCategorySummary
 )
 
 router = APIRouter()
@@ -192,4 +196,141 @@ def get_risk_summary(db: Session = Depends(get_db)):
         flooded=RiskSummaryItem(count=flooded_cnt, label="Tergenang", color="#F97316", desc="Genangan 20-40 cm, motor rawan mogok"),
         impassable=RiskSummaryItem(count=impassable_cnt, label="Tidak Dapat Dilalui", color="#EF4444", desc="Genangan >40 cm, ditutup total")
     )
+
+
+# -------------------------------------------------------------
+# PRD Bab 4 & 6.2: Faktor Risiko Lingkungan & Infrastruktur Kota
+# -------------------------------------------------------------
+
+@router.get("/environmental-risks", response_model=List[EnvironmentalRiskResponse], summary="Daftar Titik Risiko Lingkungan & Infrastruktur Drainase")
+def get_environmental_risks(
+    category: str = Query("all", description="Filter kategori: all, polder_pump, river_waste, drainage_choke, coastal_tide"),
+    risk_level: str = Query("all", description="Filter risiko: all, optimal, low, medium, high"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(
+        EnvironmentalRiskPoint.id,
+        EnvironmentalRiskPoint.slug,
+        EnvironmentalRiskPoint.name,
+        EnvironmentalRiskPoint.category,
+        EnvironmentalRiskPoint.category_label,
+        EnvironmentalRiskPoint.risk_level,
+        EnvironmentalRiskPoint.status,
+        EnvironmentalRiskPoint.capacity_or_condition,
+        EnvironmentalRiskPoint.description,
+        EnvironmentalRiskPoint.icon,
+        EnvironmentalRiskPoint.color,
+        EnvironmentalRiskPoint.created_at,
+        EnvironmentalRiskPoint.updated_at,
+        func.ST_Y(EnvironmentalRiskPoint.geom).label("lat"),
+        func.ST_X(EnvironmentalRiskPoint.geom).label("lng")
+    )
+
+    if category != "all":
+        query = query.filter(EnvironmentalRiskPoint.category == category)
+    if risk_level != "all":
+        query = query.filter(EnvironmentalRiskPoint.risk_level == risk_level)
+
+    results = query.all()
+    return [
+        EnvironmentalRiskResponse(
+            id=r.id,
+            slug=r.slug,
+            name=r.name,
+            category=r.category,
+            category_label=r.category_label,
+            risk_level=r.risk_level,
+            status=r.status,
+            capacity_or_condition=r.capacity_or_condition,
+            description=r.description,
+            icon=r.icon,
+            color=r.color,
+            lat=r.lat,
+            lng=r.lng,
+            created_at=r.created_at,
+            updated_at=r.updated_at
+        )
+        for r in results
+    ]
+
+
+@router.get("/environmental-risks/summary", response_model=EnvironmentalRiskSummaryResponse, summary="Ringkasan Statistik Infrastruktur Lingkungan")
+def get_environmental_risk_summary(db: Session = Depends(get_db)):
+    all_points = db.query(EnvironmentalRiskPoint).all()
+    total_points = len(all_points)
+
+    active_pumps = sum(1 for p in all_points if p.category == "polder_pump" and p.risk_level in ["optimal", "low"])
+    critical_drainage = sum(1 for p in all_points if p.category == "drainage_choke" and p.risk_level in ["medium", "high"])
+    river_waste = sum(1 for p in all_points if p.category == "river_waste" and p.risk_level in ["medium", "high"])
+    coastal_tide = sum(1 for p in all_points if p.category == "coastal_tide")
+
+    # Group by category
+    categories_meta = {
+        "polder_pump": "Stasiun Pompa Polder",
+        "river_waste": "Titik Sampah Sungai",
+        "drainage_choke": "Saluran Drainase Kritis",
+        "coastal_tide": "Titik Pasang Rob"
+    }
+
+    cat_summaries = []
+    for cat_key, cat_name in categories_meta.items():
+        cat_pts = [p for p in all_points if p.category == cat_key]
+        cat_summaries.append(
+            EnvironmentalCategorySummary(
+                category=cat_key,
+                label=cat_name,
+                total_count=len(cat_pts),
+                critical_count=sum(1 for p in cat_pts if p.risk_level in ["medium", "high"]),
+                optimal_count=sum(1 for p in cat_pts if p.risk_level in ["optimal", "low"])
+            )
+        )
+
+    return EnvironmentalRiskSummaryResponse(
+        total_points=total_points,
+        active_pumps=active_pumps,
+        critical_drainage_chokes=critical_drainage,
+        river_waste_hotspots=river_waste,
+        coastal_tide_risks=coastal_tide,
+        categories=cat_summaries
+    )
+
+
+@router.post("/environmental-risks", response_model=EnvironmentalRiskResponse, status_code=201, summary="Tambah Titik Faktor Risiko Lingkungan")
+def create_environmental_risk(payload: EnvironmentalRiskCreate, db: Session = Depends(get_db)):
+    geom = from_shape(Point(payload.lng, payload.lat), srid=4326)
+    point = EnvironmentalRiskPoint(
+        slug=payload.slug or f"env-{int(payload.lat*1000)}-{int(payload.lng*1000)}",
+        name=payload.name,
+        category=payload.category,
+        category_label=payload.category_label,
+        risk_level=payload.risk_level,
+        status=payload.status,
+        capacity_or_condition=payload.capacity_or_condition,
+        description=payload.description,
+        icon=payload.icon,
+        color=payload.color,
+        geom=geom
+    )
+    db.add(point)
+    db.commit()
+    db.refresh(point)
+
+    return EnvironmentalRiskResponse(
+        id=point.id,
+        slug=point.slug,
+        name=point.name,
+        category=point.category,
+        category_label=point.category_label,
+        risk_level=point.risk_level,
+        status=point.status,
+        capacity_or_condition=point.capacity_or_condition,
+        description=point.description,
+        icon=point.icon,
+        color=point.color,
+        lat=payload.lat,
+        lng=payload.lng,
+        created_at=point.created_at,
+        updated_at=point.updated_at
+    )
+
 

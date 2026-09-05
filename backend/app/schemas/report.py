@@ -23,11 +23,21 @@ class FloodReportResponse(BaseModel):
     description: Optional[str] = None
     photo_url: Optional[str] = None
     is_verified: bool = False
+    verification_status: str = "pending"
     verification_note: Optional[str] = None
     ai_confidence: int = 0
+    confirmations_count: int = 0
     lat: float
     lng: float
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+class ReportConfirmResponse(BaseModel):
+    message: str
+    report_id: int
+    confirmations_count: int
+    is_verified: bool
+    status: str
+
