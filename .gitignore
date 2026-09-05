@@ -36,3 +36,20 @@ backend/uploads/*
 *.swp
 *.swo
 
+# Modeling
+modeling/.env
+modeling/__pycache__/
+modeling/**/__pycache__/
+modeling/*.pyc
+modeling/**/*.pyc
+modeling/cache/
+modeling/checkpoints/*.pt
+modeling/checkpoints/*.pth
+modeling/data/raw/
+modeling/data/processed/
+modeling/data/training/
+modeling/data/kaggle_*/
+modeling/data/camera_baselines.json
+modeling/*.egg-info/
+modeling/dist/
+modeling/build/

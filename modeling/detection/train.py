@@ -54,21 +54,17 @@ class FloodImageDataset(Dataset):
           img1.jpg
         flood_trash/
           img1.jpg
-        flood_rain/
-          img1.jpg
 
     Labels:
       - nonflood: flood=0, cause=[0,0]
-      - flood: flood=1, cause=[0,0] (unknown cause)
-      - flood_river: flood=1, cause=[1,0]
-      - flood_trash: flood=1, cause=[0,1]
-      - flood_rain: flood=1, cause=[0,0]
+      - flood: flood=1, cause=[0,0] (genangan air hujan)
+      - flood_river: flood=1, cause=[1,0] (sungai meluap)
+      - flood_trash: flood=1, cause=[0,1] (sampah menyumbat)
     """
 
     CAUSE_MAP = {
         "flood_river": [1.0, 0.0],
         "flood_trash": [0.0, 1.0],
-        "flood_rain": [0.0, 0.0],
         "flood": [0.0, 0.0],
     }
 
@@ -87,7 +83,6 @@ class FloodImageDataset(Dataset):
             "flood": 1,
             "flood_river": 1,
             "flood_trash": 1,
-            "flood_rain": 1,
         }
 
         for class_name, flood_label in class_map.items():

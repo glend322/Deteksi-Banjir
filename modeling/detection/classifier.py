@@ -85,7 +85,8 @@ def classify_flood(depth_cm: float, area_name: str, cause_text: str = "genangan 
 
     notification = f"Daerah {area_name} banjir tingkat {classification}. Penyebab {cause_text}."
 
-    logger.info(f"[Classifier] depth={depth_cm:.1f}cm -> {classification} | cause={cause_text} | {notification}")
+    if depth_cm > 0:
+        logger.info(f"[Classifier] depth={depth_cm:.1f}cm -> {classification} | cause={cause_text} | {notification}")
 
     return ClassificationResult(
         classification=classification,

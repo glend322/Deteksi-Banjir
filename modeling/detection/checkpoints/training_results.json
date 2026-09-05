@@ -1,0 +1,16 @@
+{
+  "best_val_f1": 0.9737827715355805,
+  "best_cause_acc": 0.9459459459459459,
+  "test_acc": 0.9679144385026738,
+  "test_f1": 0.9772727272727273,
+  "test_precision": 0.9923076923076923,
+  "test_recall": 0.9626865671641791,
+  "test_cause_acc": 0.9411764705882353,
+  "test_river_acc": 0.9411764705882353,
+  "test_trash_acc": 0.9946524064171123,
+  "test_depth_mae": 3.3606601104697145,
+  "test_tp": 129,
+  "test_fp": 1,
+  "test_fn": 5,
+  "test_tn": 52
+}

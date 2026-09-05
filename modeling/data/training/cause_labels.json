@@ -34,12 +34,12 @@
     "river": 1,
     "trash": 0
   },
-  "flood_river/flood_river_0007.jpg": {
+  "flood_river/flood_river_0007.png": {
     "flood": 1,
     "river": 1,
     "trash": 0
   },
-  "flood_river/flood_river_0008.jpg": {
+  "flood_river/flood_river_0008.png": {
     "flood": 1,
     "river": 1,
     "trash": 0
@@ -159,7 +159,7 @@
     "river": 1,
     "trash": 0
   },
-  "flood_river/flood_river_0032.jpg": {
+  "flood_river/flood_river_0032.png": {
     "flood": 1,
     "river": 1,
     "trash": 0
@@ -324,7 +324,7 @@
     "river": 1,
     "trash": 0
   },
-  "flood_river/flood_river_0065.png": {
+  "flood_river/flood_river_0065.jpg": {
     "flood": 1,
     "river": 1,
     "trash": 0
@@ -334,7 +334,7 @@
     "river": 1,
     "trash": 0
   },
-  "flood_river/flood_river_0067.jpg": {
+  "flood_river/flood_river_0067.png": {
     "flood": 1,
     "river": 1,
     "trash": 0
@@ -364,12 +364,12 @@
     "river": 1,
     "trash": 0
   },
-  "flood_river/flood_river_0073.png": {
+  "flood_river/flood_river_0073.jpg": {
     "flood": 1,
     "river": 1,
     "trash": 0
   },
-  "flood_river/flood_river_0074.jpg": {
+  "flood_river/flood_river_0074.png": {
     "flood": 1,
     "river": 1,
     "trash": 0
@@ -399,7 +399,7 @@
     "river": 1,
     "trash": 0
   },
-  "flood_river/flood_river_0080.jpg": {
+  "flood_river/flood_river_0080.png": {
     "flood": 1,
     "river": 1,
     "trash": 0
@@ -414,12 +414,12 @@
     "river": 1,
     "trash": 0
   },
-  "flood_river/flood_river_0083.png": {
+  "flood_river/flood_river_0083.jpg": {
     "flood": 1,
     "river": 1,
     "trash": 0
   },
-  "flood_river/flood_river_0084.png": {
+  "flood_river/flood_river_0084.jpg": {
     "flood": 1,
     "river": 1,
     "trash": 0
@@ -434,7 +434,7 @@
     "river": 1,
     "trash": 0
   },
-  "flood_river/flood_river_0087.jpg": {
+  "flood_river/flood_river_0087.png": {
     "flood": 1,
     "river": 1,
     "trash": 0
@@ -469,12 +469,12 @@
     "river": 1,
     "trash": 0
   },
-  "flood_river/flood_river_0094.jpg": {
+  "flood_river/flood_river_0094.png": {
     "flood": 1,
     "river": 1,
     "trash": 0
   },
-  "flood_river/flood_river_0095.jpg": {
+  "flood_river/flood_river_0095.png": {
     "flood": 1,
     "river": 1,
     "trash": 0
@@ -484,12 +484,12 @@
     "river": 1,
     "trash": 0
   },
-  "flood_river/flood_river_0097.jpg": {
+  "flood_river/flood_river_0097.png": {
     "flood": 1,
     "river": 1,
     "trash": 0
   },
-  "flood_river/flood_river_0098.jpg": {
+  "flood_river/flood_river_0098.png": {
     "flood": 1,
     "river": 1,
     "trash": 0
@@ -514,7 +514,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0003.jpg": {
+  "flood_trash/flood_trash_0003.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -529,7 +529,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0006.jpg": {
+  "flood_trash/flood_trash_0006.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -569,7 +569,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0014.jpg": {
+  "flood_trash/flood_trash_0014.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -589,7 +589,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0018.jpg": {
+  "flood_trash/flood_trash_0018.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -599,7 +599,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0020.png": {
+  "flood_trash/flood_trash_0020.jpg": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -609,7 +609,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0022.png": {
+  "flood_trash/flood_trash_0022.jpg": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -619,7 +619,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0024.png": {
+  "flood_trash/flood_trash_0024.jpg": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -634,7 +634,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0027.png": {
+  "flood_trash/flood_trash_0027.jpg": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -654,7 +654,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0031.jpg": {
+  "flood_trash/flood_trash_0031.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -664,7 +664,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0033.png": {
+  "flood_trash/flood_trash_0033.jpg": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -679,7 +679,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0036.png": {
+  "flood_trash/flood_trash_0036.jpg": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -719,12 +719,12 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0044.png": {
+  "flood_trash/flood_trash_0044.jpg": {
     "flood": 1,
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0045.png": {
+  "flood_trash/flood_trash_0045.jpg": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -749,7 +749,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0050.png": {
+  "flood_trash/flood_trash_0050.jpg": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -759,7 +759,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0052.png": {
+  "flood_trash/flood_trash_0052.jpg": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -769,17 +769,17 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0054.jpg": {
+  "flood_trash/flood_trash_0054.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0055.jpg": {
+  "flood_trash/flood_trash_0055.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0056.jpg": {
+  "flood_trash/flood_trash_0056.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -789,7 +789,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0058.jpg": {
+  "flood_trash/flood_trash_0058.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -804,7 +804,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0061.jpg": {
+  "flood_trash/flood_trash_0061.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -814,7 +814,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0063.jpg": {
+  "flood_trash/flood_trash_0063.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -834,7 +834,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0067.jpg": {
+  "flood_trash/flood_trash_0067.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -849,7 +849,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0070.jpg": {
+  "flood_trash/flood_trash_0070.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -889,7 +889,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0078.jpg": {
+  "flood_trash/flood_trash_0078.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -914,7 +914,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0083.jpg": {
+  "flood_trash/flood_trash_0083.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -924,7 +924,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0085.jpg": {
+  "flood_trash/flood_trash_0085.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -944,7 +944,7 @@
     "river": 0,
     "trash": 1
   },
-  "flood_trash/flood_trash_0089.jpg": {
+  "flood_trash/flood_trash_0089.png": {
     "flood": 1,
     "river": 0,
     "trash": 1
@@ -1109,7 +1109,7 @@
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0022.jpg": {
+  "flood_rain/flood_rain_0022.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
@@ -1164,7 +1164,7 @@
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0033.jpg": {
+  "flood_rain/flood_rain_0033.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
@@ -1179,7 +1179,7 @@
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0036.jpg": {
+  "flood_rain/flood_rain_0036.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
@@ -1304,7 +1304,7 @@
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0061.jpg": {
+  "flood_rain/flood_rain_0061.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
@@ -1354,62 +1354,62 @@
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0071.jpg": {
+  "flood_rain/flood_rain_0071.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0072.jpg": {
+  "flood_rain/flood_rain_0072.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0073.jpg": {
+  "flood_rain/flood_rain_0073.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0074.jpg": {
+  "flood_rain/flood_rain_0074.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0075.jpg": {
+  "flood_rain/flood_rain_0075.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0076.jpg": {
+  "flood_rain/flood_rain_0076.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0077.jpg": {
+  "flood_rain/flood_rain_0077.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0078.jpg": {
+  "flood_rain/flood_rain_0078.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0079.jpg": {
+  "flood_rain/flood_rain_0079.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0080.jpg": {
+  "flood_rain/flood_rain_0080.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0081.jpg": {
+  "flood_rain/flood_rain_0081.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
   },
-  "flood_rain/flood_rain_0082.jpg": {
+  "flood_rain/flood_rain_0082.png": {
     "flood": 1,
     "river": 0,
     "trash": 0
