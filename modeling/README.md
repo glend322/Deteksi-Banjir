@@ -2,10 +2,11 @@
 
 AI/ML backbone untuk SafeRoute — Flood Detection & Safe Route Recommendation.
 
-## 2 Core Capabilities
+## 3 Core Modules
 
-1. **Safe Route Engine** — Kalkulasi rute aman dengan flood penalty + evakuasi terdekat
-2. **CCTV Flood Detection Pipeline** — CCTV → CV → Verify → Classify (dangkal/sedang/dalam) → Notifikasi
+1. **`detection/`** — CV Flood Detection Pipeline (CCTV → CV → Verify → Classify)
+2. **`routing/`** — Safe Route Engine (A* routing + evakuasi terdekat)
+3. **`api/`** — FastAPI Endpoints
 
 ## Quick Start
 
@@ -18,28 +19,25 @@ cp .env.example .env
 ### Run Single CCTV Scan
 
 ```bash
-python detector.py --once
+python -m detection.detector --once
 ```
 
 ### Run Continuous Monitoring
 
 ```bash
-python worker.py --interval 60
+python -m detection.worker --interval 60
 ```
 
 ### Start API Server
 
 ```bash
-cd api
-uvicorn main:app --host 0.0.0.0 --port 8001
+uvicorn api.main:app --host 0.0.0.0 --port 8001
 ```
 
 ## Output Format
 
 ```
-Daerah Kaligawe banjir di tingkat dalam
-Daerah Genuk banjir di tingkat sedang
-Daerah Mangkang banjir di tingkat dangkal
+Daerah Semarang Utara banjir tingkat sedang. Penyebab genangan air hujan.
 ```
 
 ## Classification
@@ -65,34 +63,45 @@ Daerah Mangkang banjir di tingkat dangkal
 
 ```
 modeling/
-├── MODELING_PRD.md          # Product requirements
-├── README.md                # This file
+├── MODELING_PRD.md              # Product requirements
+├── README.md                    # This file
 ├── requirements.txt
 ├── .env.example
 ├── .gitignore
-├── cctv_client.py           # Stage 1: CCTV scraping + HLS frame extraction
-├── cv_model.py              # Stage 2: CNN flood detection architecture
-├── verifier.py              # Stage 3: False positive filter
-├── classifier.py            # Stage 4: dangkal/sedang/dalam classification
-├── detector.py              # Stage 5: Pipeline orchestrator
-├── area_mapping.py          # Reverse geocode → nama daerah
-├── route_engine.py          # A* routing with flood penalty
-├── evacuation_finder.py     # Nearest evacuation point
-├── worker.py                # Background monitoring worker
-├── api/
+│
+├── detection/                   # CV Flood Detection
+│   ├── __init__.py
+│   ├── cctv_client.py           # CCTV scraping + HLS frame extraction
+│   ├── cv_model.py              # CNN flood detection architecture
+│   ├── verifier.py              # False positive filter
+│   ├── classifier.py            # dangkal/sedang/dalam classification
+│   ├── detector.py              # Pipeline orchestrator
+│   ├── train.py                 # Model training script
+│   ├── worker.py                # Background monitoring worker
+│   ├── generate_checkpoint.py   # Checkpoint generator
+│   └── prepare_training_data.py # Data preparation
+│
+├── routing/                     # Safe Route Engine
+│   ├── __init__.py
+│   ├── area_mapping.py          # Reverse geocode → nama daerah
+│   ├── route_engine.py          # A* routing with flood penalty
+│   └── evacuation_finder.py     # Nearest evacuation point
+│
+├── api/                         # FastAPI Endpoints
+│   ├── __init__.py
 │   ├── main.py
 │   ├── schemas.py
 │   └── dependencies.py
-├── data_scraper/
-│   ├── utils.py
-│   ├── bmkg_scraper.py
-│   ├── osm_scraper.py
-│   ├── kaggle_downloader.py
-│   └── config.yaml
-├── checkpoints/             # Model weights
-└── data/
-    ├── README.md
-    ├── raw/
-    ├── processed/
-    └── sample/
+│
+├── data/
+│   ├── README.md
+│   ├── camera_baselines.json    # Baseline water levels per camera
+│   ├── raw/                     # OSM, Kaggle, BMKG data
+│   ├── processed/               # Roads, waterways, drainage graphs
+│   └── training/                # Flood + nonflood images
+│
+├── checkpoints/                 # Model weights
+├── cache/                       # CCTV cache
+├── data_scraper/                # Data preparation tools
+└── notebooks/                   # Exploration notebooks
 ```

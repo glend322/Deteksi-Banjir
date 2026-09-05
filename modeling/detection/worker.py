@@ -77,7 +77,7 @@ class FloodDetectionWorker:
         self._scan_count = 0
 
     def _init_pipeline(self):
-        from flood_detection.detector import FloodDetectionPipeline
+        from detection.detector import FloodDetectionPipeline
         self._pipeline = FloodDetectionPipeline()
         self._pipeline._init()
 

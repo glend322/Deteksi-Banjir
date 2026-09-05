@@ -14,7 +14,7 @@ ROOT_DIR = Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT_DIR))
 
 import torch
-from flood_detection.cv_model import FloodClassifier
+from detection.cv_model import FloodClassifier
 
 CHECKPOINT_DIR = ROOT_DIR / "checkpoints"
 CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)

@@ -165,9 +165,9 @@ class FloodDetectionPipeline:
         self._initialized = False
 
     def _init(self):
-        from flood_detection.cctv_client import CCTVClient
-        from flood_detection.verifier import FalsePositiveFilter
-        from flood_detection.cv_model import FloodClassifier
+        from detection.cctv_client import CCTVClient
+        from detection.verifier import FalsePositiveFilter
+        from detection.cv_model import FloodClassifier
 
         logger.info("Initializing pipeline components...")
 
@@ -203,7 +203,7 @@ class FloodDetectionPipeline:
         logger.info("Pipeline initialized successfully")
 
     def _run_cv_inference(self, frame_bytes: bytes) -> dict:
-        from flood_detection.cv_model import CLASS_NAMES, CAUSE_NAMES, cause_to_text
+        from detection.cv_model import CLASS_NAMES, CAUSE_NAMES, cause_to_text
 
         img = Image.open(io.BytesIO(frame_bytes)).convert("RGB")
         transform = transforms.Compose([
@@ -276,7 +276,7 @@ class FloodDetectionPipeline:
             is_real = self._baseline.is_real_flood(cam_key, water_ratio)
             self._baseline.update_baseline(cam_key, water_ratio)
 
-            from safe_route.area_mapping import get_area_name
+            from routing.area_mapping import get_area_name
             area_name = get_area_name(camera.lat, camera.lng)
 
             final_confidence = max(0.0, min(1.0, cv_result["confidence"] + conf_mod))
@@ -289,7 +289,7 @@ class FloodDetectionPipeline:
                 and cv_result["depth_estimate_cm"] >= 10
             )
 
-            from flood_detection.classifier import classify_flood
+            from detection.classifier import classify_flood
             if is_flood:
                 cls_result = classify_flood(
                     cv_result["depth_estimate_cm"],
