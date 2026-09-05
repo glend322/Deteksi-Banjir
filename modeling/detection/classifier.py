@@ -1,7 +1,7 @@
 """
 Classifier — Klasifikasi Tingkat Banjir + Penyebab
 
-Maps depth estimate + cause detection to classification:
+Maps depth classification + cause detection to classification:
   - dangkal  : < 20 cm
   - sedang   : 20-40 cm
   - dalam    : > 40 cm
@@ -19,10 +19,10 @@ from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
-CLASSIFICATION_THRESHOLDS = {
-    "dangkal": (0, 20),
-    "sedang": (20, 40),
-    "dalam": (40, 999),
+DEPTH_CLASSIFICATION = {
+    "dangkal": 0,
+    "sedang": 1,
+    "dalam": 2,
 }
 
 STATUS_MAP = {
@@ -51,19 +51,19 @@ class ClassificationResult:
     status_label: str
     color: str
     notification: str
-    depth_cm: float
+    depth_label: str
     cause_text: str
     river_detected: bool
     trash_detected: bool
 
 
-def classify_flood(depth_cm: float, area_name: str, cause_text: str = "genangan air hujan",
+def classify_flood(depth_label: str, area_name: str, cause_text: str = "genangan air hujan",
                    river_detected: bool = False, trash_detected: bool = False) -> ClassificationResult:
     """
-    Classify flood severity based on depth and cause.
+    Classify flood severity based on depth classification and cause.
 
     Args:
-        depth_cm: estimated water depth in centimeters
+        depth_label: depth classification (dangkal/sedang/dalam)
         area_name: name of the area (e.g. "Kaligawe, Genuk")
         cause_text: human-readable cause text
         river_detected: whether river was detected
@@ -72,21 +72,16 @@ def classify_flood(depth_cm: float, area_name: str, cause_text: str = "genangan 
     Returns:
         ClassificationResult with all metadata
     """
-    if depth_cm < 20:
-        classification = "dangkal"
-    elif depth_cm < 40:
-        classification = "sedang"
-    else:
-        classification = "dalam"
+    classification = depth_label
 
-    status = STATUS_MAP[classification]
-    status_label = STATUS_LABEL_MAP[classification]
-    color = COLOR_MAP[classification]
+    status = STATUS_MAP.get(classification, "safe")
+    status_label = STATUS_LABEL_MAP.get(classification, "Aman")
+    color = COLOR_MAP.get(classification, "#10B981")
 
     notification = f"Daerah {area_name} banjir tingkat {classification}. Penyebab {cause_text}."
 
-    if depth_cm > 0:
-        logger.info(f"[Classifier] depth={depth_cm:.1f}cm -> {classification} | cause={cause_text} | {notification}")
+    if classification in DEPTH_CLASSIFICATION:
+        logger.info(f"[Classifier] depth={classification} | cause={cause_text} | {notification}")
 
     return ClassificationResult(
         classification=classification,
@@ -94,7 +89,7 @@ def classify_flood(depth_cm: float, area_name: str, cause_text: str = "genangan 
         status_label=status_label,
         color=color,
         notification=notification,
-        depth_cm=depth_cm,
+        depth_label=classification,
         cause_text=cause_text,
         river_detected=river_detected,
         trash_detected=trash_detected,

@@ -17,6 +17,7 @@ CLASS_NAMES = ["no_flood", "flood"]
 CAUSE_NAMES = ["river", "trash"]
 DEPTH_BUCKETS = [(0, 20), (20, 40), (40, 200)]
 DEPTH_BUCKET_LABELS = ["dangkal", "sedang", "dalam"]
+DEPTH_CLASSES = {"dangkal": 0, "sedang": 1, "dalam": 2}
 DEPTH_BUCKET_COLORS = ["#F59E0B", "#F97316", "#EF4444"]
 
 BACKBONE_REGISTRY = {
@@ -27,9 +28,9 @@ BACKBONE_REGISTRY = {
 
 
 class FloodClassifier(nn.Module):
-    """CNN backbone with three heads: flood cls, depth reg, cause detection."""
+    """CNN backbone with three heads: flood cls, depth cls (3 classes), cause detection."""
 
-    def __init__(self, num_classes: int = 2, num_causes: int = 2, pretrained: bool = True, backbone: str = "resnet50"):
+    def __init__(self, num_classes: int = 2, num_causes: int = 2, num_depth_classes: int = 3, pretrained: bool = True, backbone: str = "resnet50"):
         super().__init__()
         if backbone not in BACKBONE_REGISTRY:
             raise ValueError(f"Unknown backbone: {backbone}. Choose from {list(BACKBONE_REGISTRY.keys())}")
@@ -54,12 +55,12 @@ class FloodClassifier(nn.Module):
             nn.Linear(256, num_classes),
         )
 
-        self.depth_regressor = nn.Sequential(
+        self.depth_classifier = nn.Sequential(
             nn.Dropout(0.3),
             nn.Linear(feature_dim, 128),
             nn.ReLU(),
             nn.Dropout(0.2),
-            nn.Linear(128, 1),
+            nn.Linear(128, num_depth_classes),
         )
 
         self.cause_classifier = nn.Sequential(
@@ -73,11 +74,11 @@ class FloodClassifier(nn.Module):
     def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
         features = self.backbone(x)
         logits = self.classifier(features)
-        depth_cm = self.depth_regressor(features).squeeze(-1)
+        depth_logits = self.depth_classifier(features)
         cause_logits = self.cause_classifier(features)
         return {
             "logits": logits,
-            "depth_cm": depth_cm,
+            "depth_logits": depth_logits,
             "cause_logits": cause_logits,
         }
 
@@ -90,6 +91,21 @@ def depth_to_classification(depth_cm: float) -> str:
         return "sedang"
     else:
         return "dalam"
+
+
+def depth_cm_to_class(depth_cm: float) -> int:
+    """Map depth in cm to class index (0=dangkal, 1=sedang, 2=dalam)."""
+    if depth_cm < 20:
+        return 0
+    elif depth_cm < 40:
+        return 1
+    else:
+        return 2
+
+
+def depth_class_to_bucket(depth_class: int) -> str:
+    """Map class index to bucket label."""
+    return DEPTH_BUCKET_LABELS[depth_class]
 
 
 def depth_to_bucket(depth_cm: float) -> str:

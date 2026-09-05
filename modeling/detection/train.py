@@ -40,6 +40,16 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
 
+def depth_cm_to_class(depth_cm: float) -> int:
+    """Map depth in cm to class index (0=dangkal, 1=sedang, 2=dalam)."""
+    if depth_cm < 20:
+        return 0
+    elif depth_cm < 40:
+        return 1
+    else:
+        return 2
+
+
 class FloodImageDataset(Dataset):
     """
     Dataset for flood classification + cause detection.
@@ -56,10 +66,10 @@ class FloodImageDataset(Dataset):
           img1.jpg
 
     Labels:
-      - nonflood: flood=0, cause=[0,0]
-      - flood: flood=1, cause=[0,0] (genangan air hujan)
-      - flood_river: flood=1, cause=[1,0] (sungai meluap)
-      - flood_trash: flood=1, cause=[0,1] (sampah menyumbat)
+      - nonflood: flood=0, depth=0, cause=[0,0]
+      - flood: flood=1, depth=1 (sedang), cause=[0,0] (genangan air hujan)
+      - flood_river: flood=1, depth=1 (sedang), cause=[1,0] (sungai meluap)
+      - flood_trash: flood=1, depth=1 (sedang), cause=[0,1] (sampah menyumbat)
     """
 
     CAUSE_MAP = {
@@ -92,12 +102,13 @@ class FloodImageDataset(Dataset):
             for img_path in class_dir.glob("*"):
                 if img_path.suffix.lower() in {".jpg", ".jpeg", ".png", ".bmp", ".webp"}:
                     if flood_label == 0:
-                        depth = 0.0
+                        depth_cm = 0.0
                         cause = [0.0, 0.0]
                     else:
-                        depth = 30.0
+                        depth_cm = 30.0
                         cause = self.CAUSE_MAP.get(class_name, [0.0, 0.0])
-                    self.samples.append((str(img_path), flood_label, depth, cause))
+                    depth_class = depth_cm_to_class(depth_cm)
+                    self.samples.append((str(img_path), flood_label, depth_class, cause))
 
         flood_count = sum(1 for _, l, _, _ in self.samples if l == 1)
         noflood_count = sum(1 for _, l, _, _ in self.samples if l == 0)
@@ -112,7 +123,7 @@ class FloodImageDataset(Dataset):
         return len(self.samples)
 
     def __getitem__(self, idx):
-        path, label, depth, cause = self.samples[idx]
+        path, label, depth_class, cause = self.samples[idx]
 
         try:
             img = Image.open(path).convert("RGB")
@@ -125,7 +136,7 @@ class FloodImageDataset(Dataset):
         return (
             img,
             torch.tensor(label, dtype=torch.long),
-            torch.tensor(depth, dtype=torch.float32),
+            torch.tensor(depth_class, dtype=torch.long),
             torch.tensor(cause, dtype=torch.float32),
         )
 
@@ -201,21 +212,21 @@ def train_one_epoch(model, loader, criterion_cls, criterion_depth, criterion_cau
     total_loss = 0
     correct = 0
     total = 0
-    depth_errors = []
+    depth_correct = 0
     cause_correct = 0
     cause_total = 0
 
-    for images, labels, depths, causes in loader:
+    for images, labels, depth_classes, causes in loader:
         images = images.to(device)
         labels = labels.to(device)
-        depths = depths.to(device)
+        depth_classes = depth_classes.to(device)
         causes = causes.to(device)
 
         optimizer.zero_grad()
         out = model(images)
 
         loss_cls = criterion_cls(out["logits"], labels)
-        loss_depth = criterion_depth(out["depth_cm"], depths)
+        loss_depth = criterion_depth(out["depth_logits"], depth_classes)
         loss_cause = criterion_cause(out["cause_logits"], causes)
         loss = cls_weight * loss_cls + depth_weight * loss_depth + cause_weight * loss_cause
 
@@ -227,7 +238,8 @@ def train_one_epoch(model, loader, criterion_cls, criterion_depth, criterion_cau
         preds = out["logits"].argmax(dim=1)
         correct += (preds == labels).sum().item()
         total += images.size(0)
-        depth_errors.extend(torch.abs(out["depth_cm"] - depths).cpu().detach().numpy().tolist())
+        depth_preds = out["depth_logits"].argmax(dim=1)
+        depth_correct += (depth_preds == depth_classes).sum().item()
 
         cause_preds = (torch.sigmoid(out["cause_logits"]) > 0.5).float()
         cause_correct += (cause_preds == causes).all(dim=1).sum().item()
@@ -235,9 +247,9 @@ def train_one_epoch(model, loader, criterion_cls, criterion_depth, criterion_cau
 
     avg_loss = total_loss / total if total > 0 else 0
     accuracy = correct / total if total > 0 else 0
-    avg_depth_mae = np.mean(depth_errors) if depth_errors else 0
+    depth_acc = depth_correct / total if total > 0 else 0
     cause_acc = cause_correct / cause_total if cause_total > 0 else 0
-    return avg_loss, accuracy, avg_depth_mae, cause_acc
+    return avg_loss, accuracy, depth_acc, cause_acc
 
 
 @torch.no_grad()
@@ -246,18 +258,20 @@ def evaluate(model, loader, criterion_cls, criterion_depth, criterion_cause, dev
     total_loss = 0
     correct = 0
     total = 0
-    depth_errors = []
+    depth_correct = 0
     cause_correct = 0
     cause_total = 0
     all_preds = []
     all_labels = []
+    all_depth_preds = []
+    all_depth_labels = []
     all_cause_preds = []
     all_cause_labels = []
 
-    for images, labels, depths, causes in loader:
+    for images, labels, depth_classes, causes in loader:
         images = images.to(device)
         labels = labels.to(device)
-        depths = depths.to(device)
+        depth_classes = depth_classes.to(device)
         causes = causes.to(device)
 
         out = model(images)
@@ -267,7 +281,8 @@ def evaluate(model, loader, criterion_cls, criterion_depth, criterion_cause, dev
         preds = out["logits"].argmax(dim=1)
         correct += (preds == labels).sum().item()
         total += images.size(0)
-        depth_errors.extend(torch.abs(out["depth_cm"] - depths).cpu().detach().numpy().tolist())
+        depth_preds = out["depth_logits"].argmax(dim=1)
+        depth_correct += (depth_preds == depth_classes).sum().item()
 
         cause_preds = (torch.sigmoid(out["cause_logits"]) > 0.5).float()
         cause_correct += (cause_preds == causes).all(dim=1).sum().item()
@@ -275,12 +290,14 @@ def evaluate(model, loader, criterion_cls, criterion_depth, criterion_cause, dev
 
         all_preds.extend(preds.cpu().numpy())
         all_labels.extend(labels.cpu().numpy())
+        all_depth_preds.extend(depth_preds.cpu().numpy())
+        all_depth_labels.extend(depth_classes.cpu().numpy())
         all_cause_preds.extend(cause_preds.cpu().numpy())
         all_cause_labels.extend(causes.cpu().numpy())
 
     avg_loss = total_loss / total if total > 0 else 0
     accuracy = correct / total if total > 0 else 0
-    avg_depth_mae = np.mean(depth_errors) if depth_errors else 0
+    depth_acc = depth_correct / total if total > 0 else 0
     cause_acc = cause_correct / cause_total if cause_total > 0 else 0
 
     all_preds = np.array(all_preds)
@@ -300,7 +317,13 @@ def evaluate(model, loader, criterion_cls, criterion_depth, criterion_cause, dev
     river_acc = (all_cause_preds[:, 0] == all_cause_labels[:, 0]).mean() if len(all_cause_preds) > 0 else 0
     trash_acc = (all_cause_preds[:, 1] == all_cause_labels[:, 1]).mean() if len(all_cause_preds) > 0 else 0
 
-    return avg_loss, accuracy, avg_depth_mae, cause_acc, {
+    all_depth_preds = np.array(all_depth_preds)
+    all_depth_labels = np.array(all_depth_labels)
+    dangkal_acc = ((all_depth_preds == 0) & (all_depth_labels == 0)).sum() / max((all_depth_labels == 0).sum(), 1)
+    sedang_acc = ((all_depth_preds == 1) & (all_depth_labels == 1)).sum() / max((all_depth_labels == 1).sum(), 1)
+    dalam_acc = ((all_depth_preds == 2) & (all_depth_labels == 2)).sum() / max((all_depth_labels == 2).sum(), 1)
+
+    return avg_loss, accuracy, depth_acc, cause_acc, {
         "precision": precision,
         "recall": recall,
         "f1": f1,
@@ -310,6 +333,9 @@ def evaluate(model, loader, criterion_cls, criterion_depth, criterion_cause, dev
         "tn": int(tn),
         "river_acc": river_acc,
         "trash_acc": trash_acc,
+        "dangkal_acc": dangkal_acc,
+        "sedang_acc": sedang_acc,
+        "dalam_acc": dalam_acc,
     }
 
 
@@ -384,7 +410,7 @@ def main():
     model.to(device)
 
     criterion_cls = LabelSmoothingCrossEntropy(smoothing=args.label_smoothing)
-    criterion_depth = nn.L1Loss()
+    criterion_depth = nn.CrossEntropyLoss()
     criterion_cause = nn.BCEWithLogitsLoss()
 
     optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
@@ -399,11 +425,11 @@ def main():
     logger.info(f"Weights: cls={args.cls_weight}, depth={args.depth_weight}, cause={args.cause_weight}")
 
     for epoch in range(args.epochs):
-        train_loss, train_acc, train_depth_mae, train_cause_acc = train_one_epoch(
+        train_loss, train_acc, train_depth_acc, train_cause_acc = train_one_epoch(
             model, train_loader, criterion_cls, criterion_depth, criterion_cause, optimizer, device,
             cls_weight=args.cls_weight, depth_weight=args.depth_weight, cause_weight=args.cause_weight
         )
-        val_loss, val_acc, val_depth_mae, val_cause_acc, val_metrics = evaluate(
+        val_loss, val_acc, val_depth_acc, val_cause_acc, val_metrics = evaluate(
             model, val_loader, criterion_cls, criterion_depth, criterion_cause, device
         )
         scheduler.step()
@@ -430,12 +456,13 @@ def main():
                 "backbone": args.backbone,
                 "num_classes": 2,
                 "num_causes": 2,
+                "num_depth_classes": 3,
                 "val_acc": val_acc,
                 "val_f1": val_metrics["f1"],
                 "val_cause_acc": val_cause_acc,
                 "val_river_acc": val_metrics["river_acc"],
                 "val_trash_acc": val_metrics["trash_acc"],
-                "val_depth_mae": val_depth_mae,
+                "val_depth_acc": val_depth_acc,
                 "epoch": epoch + 1,
                 "train_args": vars(args),
             }
@@ -454,7 +481,7 @@ def main():
     logger.info(f"{'='*60}")
 
     logger.info(f"\nRunning final evaluation on test set...")
-    test_loss, test_acc, test_depth_mae, test_cause_acc, test_metrics = evaluate(
+    test_loss, test_acc, test_depth_acc, test_cause_acc, test_metrics = evaluate(
         model, test_loader, criterion_cls, criterion_depth, criterion_cause, device
     )
 
@@ -468,7 +495,10 @@ def main():
     logger.info(f"Test Cause Acc: {test_cause_acc:.4f}")
     logger.info(f"Test River Acc: {test_metrics['river_acc']:.4f}")
     logger.info(f"Test Trash Acc: {test_metrics['trash_acc']:.4f}")
-    logger.info(f"Test Depth MAE: {test_depth_mae:.2f}cm")
+    logger.info(f"Test Depth Acc: {test_depth_acc:.4f}")
+    logger.info(f"  Dangkal Acc: {test_metrics['dangkal_acc']:.4f}")
+    logger.info(f"  Sedang Acc: {test_metrics['sedang_acc']:.4f}")
+    logger.info(f"  Dalam Acc: {test_metrics['dalam_acc']:.4f}")
     logger.info(f"TP:{test_metrics['tp']} FP:{test_metrics['fp']} FN:{test_metrics['fn']} TN:{test_metrics['tn']}")
     logger.info(f"{'='*60}")
 
@@ -482,7 +512,10 @@ def main():
         "test_cause_acc": test_cause_acc,
         "test_river_acc": test_metrics["river_acc"],
         "test_trash_acc": test_metrics["trash_acc"],
-        "test_depth_mae": test_depth_mae,
+        "test_depth_acc": test_depth_acc,
+        "test_dangkal_acc": test_metrics["dangkal_acc"],
+        "test_sedang_acc": test_metrics["sedang_acc"],
+        "test_dalam_acc": test_metrics["dalam_acc"],
         "test_tp": test_metrics["tp"],
         "test_fp": test_metrics["fp"],
         "test_fn": test_metrics["fn"],

@@ -1,387 +1,387 @@
 {
   "cctv_414_330": {
-    "mean_water_ratio": 0.3132950989484692,
-    "count": 7,
-    "last_update": 1788612383.09016
+    "mean_water_ratio": 0.2680746843464924,
+    "count": 9,
+    "last_update": 1788624624.9658427
   },
   "cctv_414_324": {
-    "mean_water_ratio": 0.17229201198046878,
-    "count": 8,
-    "last_update": 1788612382.923771
+    "mean_water_ratio": 0.14523332006876305,
+    "count": 10,
+    "last_update": 1788624624.9951448
   },
   "cctv_414_327": {
-    "mean_water_ratio": 0.04416485230891928,
-    "count": 8,
-    "last_update": 1788612383.2138627
+    "mean_water_ratio": 0.07001552255772461,
+    "count": 10,
+    "last_update": 1788624628.3253012
   },
   "cctv_414_321": {
-    "mean_water_ratio": 0.44978888806226325,
-    "count": 8,
-    "last_update": 1788612383.0120645
+    "mean_water_ratio": 0.4328234654762666,
+    "count": 10,
+    "last_update": 1788624627.7865582
   },
   "cctv_414_333": {
-    "mean_water_ratio": 0.5368971144370955,
-    "count": 8,
-    "last_update": 1788612383.167381
+    "mean_water_ratio": 0.550584050326088,
+    "count": 9,
+    "last_update": 1788624625.0462077
   },
   "cctv_414_343": {
-    "mean_water_ratio": 0.063254667423256,
-    "count": 8,
-    "last_update": 1788612384.4387703
+    "mean_water_ratio": 0.053462349899453525,
+    "count": 10,
+    "last_update": 1788624626.1664693
   },
   "cctv_414_337": {
-    "mean_water_ratio": 0.43882496066341153,
-    "count": 8,
-    "last_update": 1788612386.2117798
+    "mean_water_ratio": 0.42631859574152997,
+    "count": 10,
+    "last_update": 1788624626.0229375
   },
   "cctv_414_1307": {
-    "mean_water_ratio": 0.44373741607875644,
-    "count": 8,
-    "last_update": 1788612384.1896286
+    "mean_water_ratio": 0.36682728334955034,
+    "count": 10,
+    "last_update": 1788624628.4645464
   },
   "cctv_10239_2798": {
-    "mean_water_ratio": 0.1783553246171875,
-    "count": 8,
-    "last_update": 1788612390.688937
+    "mean_water_ratio": 0.1444678129399219,
+    "count": 10,
+    "last_update": 1788624634.0252717
   },
   "cctv_10245_3281": {
-    "mean_water_ratio": 0.4209929362065972,
-    "count": 7,
-    "last_update": 1788612386.7728214
+    "mean_water_ratio": 0.4109381324940104,
+    "count": 9,
+    "last_update": 1788624627.0763838
   },
   "cctv_10245_3279": {
-    "mean_water_ratio": 0.30301705397092016,
-    "count": 8,
-    "last_update": 1788612385.4455197
+    "mean_water_ratio": 0.2756879543414454,
+    "count": 10,
+    "last_update": 1788624628.0454297
   },
   "cctv_10245_3278": {
-    "mean_water_ratio": 0.4523381711827258,
-    "count": 8,
-    "last_update": 1788612385.855391
+    "mean_water_ratio": 0.4109178335885635,
+    "count": 10,
+    "last_update": 1788624628.6628697
   },
   "cctv_10245_3277": {
-    "mean_water_ratio": 0.3388886008789063,
-    "count": 8,
-    "last_update": 1788612386.9036362
+    "mean_water_ratio": 0.33071198037434907,
+    "count": 9,
+    "last_update": 1788623182.8997579
   },
   "cctv_10209_6600": {
-    "mean_water_ratio": 0.15846635011111115,
-    "count": 8,
-    "last_update": 1788612387.0483615
+    "mean_water_ratio": 0.18555362032611117,
+    "count": 10,
+    "last_update": 1788624629.2200253
   },
   "cctv_10209_6601": {
-    "mean_water_ratio": 0.09574471864583334,
-    "count": 8,
-    "last_update": 1788612388.5313344
+    "mean_water_ratio": 0.140220018978125,
+    "count": 10,
+    "last_update": 1788624629.3950226
   },
   "cctv_10209_2114": {
-    "mean_water_ratio": 0.5326191462065972,
-    "count": 7,
-    "last_update": 1788612389.068473
+    "mean_water_ratio": 0.4971276308914931,
+    "count": 8,
+    "last_update": 1788624629.5806928
   },
   "cctv_10209_2071": {
-    "mean_water_ratio": 0.27562084672309034,
-    "count": 7,
-    "last_update": 1788612389.2038448
+    "mean_water_ratio": 0.3179417313318143,
+    "count": 9,
+    "last_update": 1788624631.1010935
   },
   "cctv_10209_2075": {
-    "mean_water_ratio": 0.17392554335677085,
-    "count": 8,
-    "last_update": 1788612389.4711273
+    "mean_water_ratio": 0.23154993751481773,
+    "count": 10,
+    "last_update": 1788624631.2144723
   },
   "cctv_10209_2073": {
-    "mean_water_ratio": 0.1300847290138889,
-    "count": 8,
-    "last_update": 1788612388.173082
+    "mean_water_ratio": 0.17589280584847225,
+    "count": 10,
+    "last_update": 1788624630.285672
   },
   "cctv_10209_2076": {
-    "mean_water_ratio": 0.48984784057725705,
-    "count": 7,
-    "last_update": 1788612391.7861826
+    "mean_water_ratio": 0.45523117795091156,
+    "count": 9,
+    "last_update": 1788624632.4480226
   },
   "cctv_10209_2077": {
-    "mean_water_ratio": 0.6456638549921876,
-    "count": 8,
-    "last_update": 1788612390.1102498
+    "mean_water_ratio": 0.6351707520575608,
+    "count": 10,
+    "last_update": 1788624632.5318696
   },
   "cctv_10209_2080": {
-    "mean_water_ratio": 0.7167457878212891,
-    "count": 8,
-    "last_update": 1788612393.4964962
+    "mean_water_ratio": 0.7035993420414941,
+    "count": 10,
+    "last_update": 1788624633.3357015
   },
   "cctv_10209_2082": {
-    "mean_water_ratio": 0.3174365745959202,
-    "count": 8,
-    "last_update": 1788612391.0903003
+    "mean_water_ratio": 0.32236151604769536,
+    "count": 10,
+    "last_update": 1788624633.4436395
   },
   "cctv_10209_2085": {
-    "mean_water_ratio": 0.4761317386584202,
-    "count": 8,
-    "last_update": 1788612392.0544543
+    "mean_water_ratio": 0.4145959617855426,
+    "count": 10,
+    "last_update": 1788624634.528129
   },
   "cctv_10209_2083": {
-    "mean_water_ratio": 0.5072420024001737,
-    "count": 8,
-    "last_update": 1788612391.8962114
+    "mean_water_ratio": 0.4628339906941408,
+    "count": 10,
+    "last_update": 1788624634.3544724
   },
   "cctv_10209_2097": {
-    "mean_water_ratio": 0.6038715241753472,
-    "count": 7,
-    "last_update": 1788612393.038477
+    "mean_water_ratio": 0.5192450925681423,
+    "count": 9,
+    "last_update": 1788624635.423864
   },
   "cctv_10209_2095": {
-    "mean_water_ratio": 0.3980663089296876,
-    "count": 8,
-    "last_update": 1788612392.9754632
+    "mean_water_ratio": 0.32243371023304696,
+    "count": 10,
+    "last_update": 1788624634.9641833
   },
   "cctv_10209_2096": {
-    "mean_water_ratio": 0.402372059765625,
-    "count": 6,
-    "last_update": 1788612393.0812497
+    "mean_water_ratio": 0.3259213684101563,
+    "count": 8,
+    "last_update": 1788624635.2871037
   },
   "cctv_10209_2105": {
-    "mean_water_ratio": 0.45415442856933597,
-    "count": 8,
-    "last_update": 1788612394.208457
+    "mean_water_ratio": 0.4580560051099121,
+    "count": 10,
+    "last_update": 1788624636.2302365
   },
   "cctv_10209_2102": {
-    "mean_water_ratio": 0.37058648634982644,
-    "count": 7,
-    "last_update": 1788612394.033391
+    "mean_water_ratio": 0.3763452362350261,
+    "count": 9,
+    "last_update": 1788624636.4379604
   },
   "cctv_10209_2107": {
-    "mean_water_ratio": 0.2239030677603674,
-    "count": 8,
-    "last_update": 1788612403.7845993
+    "mean_water_ratio": 0.24850249952447084,
+    "count": 10,
+    "last_update": 1788624637.7777753
   },
   "cctv_10209_2070": {
-    "mean_water_ratio": 0.2481629739079861,
-    "count": 8,
-    "last_update": 1788612395.0675373
+    "mean_water_ratio": 0.23045567205991319,
+    "count": 10,
+    "last_update": 1788624638.19031
   },
   "cctv_10209_2101": {
-    "mean_water_ratio": 0.21016950029991324,
-    "count": 8,
-    "last_update": 1788612396.4679062
+    "mean_water_ratio": 0.20233829350681862,
+    "count": 10,
+    "last_update": 1788624637.6407113
   },
   "cctv_10209_2116": {
-    "mean_water_ratio": 0.21368354921527782,
-    "count": 8,
-    "last_update": 1788612395.366234
+    "mean_water_ratio": 0.24725355333659726,
+    "count": 10,
+    "last_update": 1788624638.6624374
   },
   "cctv_414_354": {
-    "mean_water_ratio": 0.4679026960364584,
-    "count": 8,
-    "last_update": 1788612384.1474333
+    "mean_water_ratio": 0.397905936393698,
+    "count": 10,
+    "last_update": 1788624626.049578
   },
   "cctv_10209_2100": {
-    "mean_water_ratio": 0.3582325648945313,
-    "count": 8,
-    "last_update": 1788612396.014216
+    "mean_water_ratio": 0.29016837756457037,
+    "count": 10,
+    "last_update": 1788624638.75271
   },
   "cctv_10209_2099": {
-    "mean_water_ratio": 0.24720116908984374,
-    "count": 8,
-    "last_update": 1788612396.3102188
+    "mean_water_ratio": 0.20023294696277344,
+    "count": 10,
+    "last_update": 1788624639.1025412
   },
   "cctv_10209_2115": {
-    "mean_water_ratio": 0.5064337768524307,
-    "count": 8,
-    "last_update": 1788612396.9459615
+    "mean_water_ratio": 0.4463650918893578,
+    "count": 10,
+    "last_update": 1788624640.5538726
   },
   "cctv_1680_368": {
-    "mean_water_ratio": 0.5053398587534723,
-    "count": 8,
-    "last_update": 1788612395.967958
+    "mean_water_ratio": 0.4530536276042014,
+    "count": 10,
+    "last_update": 1788624638.364914
   },
   "cctv_10470_9628": {
-    "mean_water_ratio": 0.4896014159145164,
-    "count": 7,
-    "last_update": 1788604166.3658495
+    "mean_water_ratio": 0.3965771468907583,
+    "count": 9,
+    "last_update": 1788624639.3911018
   },
   "cctv_10209_2121": {
-    "mean_water_ratio": 0.5181985339657119,
-    "count": 8,
-    "last_update": 1788612397.668106
+    "mean_water_ratio": 0.5324741024427823,
+    "count": 10,
+    "last_update": 1788624640.342944
   },
   "cctv_10209_2119": {
-    "mean_water_ratio": 0.26827583370746527,
-    "count": 8,
-    "last_update": 1788612399.2603729
+    "mean_water_ratio": 0.2776201353724913,
+    "count": 10,
+    "last_update": 1788624639.6691542
   },
   "cctv_10209_2120": {
-    "mean_water_ratio": 0.3039553626866319,
-    "count": 8,
-    "last_update": 1788612397.8439405
+    "mean_water_ratio": 0.283167689262283,
+    "count": 10,
+    "last_update": 1788624640.2978828
   },
   "cctv_10209_2074": {
     "mean_water_ratio": 0.0,
-    "count": 8,
-    "last_update": 1788612399.9996388
+    "count": 10,
+    "last_update": 1788624641.7448373
   },
   "cctv_10209_2072": {
-    "mean_water_ratio": 0.3352586934960938,
-    "count": 8,
-    "last_update": 1788612399.6327405
+    "mean_water_ratio": 0.27155954173183594,
+    "count": 10,
+    "last_update": 1788624641.211507
   },
   "cctv_10209_2086": {
-    "mean_water_ratio": 0.24857719348003476,
-    "count": 8,
-    "last_update": 1788612401.0084612
+    "mean_water_ratio": 0.2320753769098091,
+    "count": 9,
+    "last_update": 1788624642.660261
   },
   "cctv_10209_2084": {
-    "mean_water_ratio": 0.4010179398871529,
-    "count": 8,
-    "last_update": 1788612402.0723183
+    "mean_water_ratio": 0.39907006082248275,
+    "count": 10,
+    "last_update": 1788624644.7883003
   },
   "cctv_10209_2081": {
-    "mean_water_ratio": 0.23680429311111112,
-    "count": 8,
-    "last_update": 1788612400.28087
+    "mean_water_ratio": 0.25447996700333336,
+    "count": 10,
+    "last_update": 1788624641.7819798
   },
   "cctv_10209_2087": {
-    "mean_water_ratio": 0.45275961691970495,
-    "count": 8,
-    "last_update": 1788612401.2059674
+    "mean_water_ratio": 0.4254125466494054,
+    "count": 10,
+    "last_update": 1788624642.6945915
   },
   "cctv_10209_2094": {
-    "mean_water_ratio": 0.3115350281328126,
-    "count": 8,
-    "last_update": 1788612402.9778533
+    "mean_water_ratio": 0.2523433727875782,
+    "count": 10,
+    "last_update": 1788624643.0218616
   },
   "cctv_10209_2106": {
-    "mean_water_ratio": 0.3175437301905383,
-    "count": 8,
-    "last_update": 1788612404.3854043
+    "mean_water_ratio": 0.2754640238848916,
+    "count": 10,
+    "last_update": 1788624644.4536479
   },
   "cctv_10209_2139": {
-    "mean_water_ratio": 0.26769372766970495,
-    "count": 8,
-    "last_update": 1788612405.3383884
+    "mean_water_ratio": 0.27749119518051224,
+    "count": 9,
+    "last_update": 1788623200.048555
   },
   "cctv_10209_2138": {
-    "mean_water_ratio": 0.3138751421757813,
-    "count": 8,
-    "last_update": 1788612405.7950509
+    "mean_water_ratio": 0.25423886516238287,
+    "count": 10,
+    "last_update": 1788624644.6599984
   },
   "cctv_10209_2145": {
-    "mean_water_ratio": 0.21254250389322918,
-    "count": 7,
-    "last_update": 1788612406.3921502
+    "mean_water_ratio": 0.22329388995907118,
+    "count": 9,
+    "last_update": 1788624645.6464822
   },
   "cctv_10209_2140": {
-    "mean_water_ratio": 0.410552502154948,
-    "count": 8,
-    "last_update": 1788612406.4752614
+    "mean_water_ratio": 0.4038878769394532,
+    "count": 9,
+    "last_update": 1788623198.87681
   },
   "cctv_10209_2141": {
-    "mean_water_ratio": 0.20797481026562503,
-    "count": 8,
-    "last_update": 1788612405.7321246
+    "mean_water_ratio": 0.16845959631515628,
+    "count": 10,
+    "last_update": 1788624645.4458392
   },
   "cctv_10209_2152": {
-    "mean_water_ratio": 0.6736786821827258,
-    "count": 8,
-    "last_update": 1788612407.4102795
+    "mean_water_ratio": 0.6595219634707856,
+    "count": 10,
+    "last_update": 1788624646.6636298
   },
   "cctv_10209_2153": {
-    "mean_water_ratio": 0.443822158780382,
-    "count": 7,
-    "last_update": 1788612407.4882855
+    "mean_water_ratio": 0.4141143513898872,
+    "count": 9,
+    "last_update": 1788624648.6967325
   },
   "cctv_10209_2151": {
-    "mean_water_ratio": 0.17890601807465278,
-    "count": 8,
-    "last_update": 1788612407.3595448
+    "mean_water_ratio": 0.17817073227935767,
+    "count": 10,
+    "last_update": 1788624646.461764
   },
   "cctv_10209_2148": {
-    "mean_water_ratio": 0.159932351734375,
-    "count": 8,
-    "last_update": 1788612406.6739254
+    "mean_water_ratio": 0.15806868580762154,
+    "count": 10,
+    "last_update": 1788624645.6954832
   },
   "cctv_10209_2068": {
-    "mean_water_ratio": 0.4615197787022569,
-    "count": 7,
-    "last_update": 1788612409.694135
+    "mean_water_ratio": 0.439698815887717,
+    "count": 9,
+    "last_update": 1788624647.609169
   },
   "cctv_10209_2069": {
-    "mean_water_ratio": 0.6199334436900746,
-    "count": 8,
-    "last_update": 1788612408.4305677
+    "mean_water_ratio": 0.6011287134814477,
+    "count": 10,
+    "last_update": 1788624648.2914119
   },
   "cctv_10209_2118": {
-    "mean_water_ratio": 0.408226767514974,
-    "count": 8,
-    "last_update": 1788612411.9115176
+    "mean_water_ratio": 0.4834891374162957,
+    "count": 10,
+    "last_update": 1788624651.391435
   },
   "cctv_10209_2103": {
-    "mean_water_ratio": 0.32763971399826397,
-    "count": 8,
-    "last_update": 1788612409.6511214
+    "mean_water_ratio": 0.28868222215803824,
+    "count": 10,
+    "last_update": 1788624649.612788
   },
   "cctv_10209_2104": {
-    "mean_water_ratio": 0.40642795847656255,
-    "count": 8,
-    "last_update": 1788612409.142581
+    "mean_water_ratio": 0.3292066463660157,
+    "count": 10,
+    "last_update": 1788624649.188021
   },
   "cctv_10209_2117": {
-    "mean_water_ratio": 0.5404321344953442,
-    "count": 8,
-    "last_update": 1788612410.1162758
+    "mean_water_ratio": 0.5357978410466582,
+    "count": 10,
+    "last_update": 1788624650.4302433
   },
   "cctv_10209_2098": {
-    "mean_water_ratio": 0.46539809934288195,
-    "count": 8,
-    "last_update": 1788612410.5938108
+    "mean_water_ratio": 0.4027337885927344,
+    "count": 10,
+    "last_update": 1788624650.5784273
   },
   "cctv_10209_2066": {
-    "mean_water_ratio": 0.1430907319118924,
-    "count": 8,
-    "last_update": 1788612410.8870137
+    "mean_water_ratio": 0.1471202029180773,
+    "count": 10,
+    "last_update": 1788624651.351891
   },
   "cctv_10209_2154": {
-    "mean_water_ratio": 0.21961025192274305,
-    "count": 7,
-    "last_update": 1788612408.15941
+    "mean_water_ratio": 0.18866299329353298,
+    "count": 9,
+    "last_update": 1788624647.359255
   },
   "cctv_10209_2062": {
-    "mean_water_ratio": 0.3743936853890467,
-    "count": 4,
-    "last_update": 1788612394.1042228
+    "mean_water_ratio": 0.3993073088551531,
+    "count": 6,
+    "last_update": 1788624637.2024925
   },
   "cctv_10209_2128": {
-    "mean_water_ratio": 0.4258816536458333,
-    "count": 4,
-    "last_update": 1788612398.6238005
+    "mean_water_ratio": 0.4995115786892361,
+    "count": 6,
+    "last_update": 1788624640.5888815
   },
   "cctv_10209_2127": {
-    "mean_water_ratio": 0.32824831163194446,
-    "count": 4,
-    "last_update": 1788612398.7657976
+    "mean_water_ratio": 0.4382693702690972,
+    "count": 6,
+    "last_update": 1788624642.0560253
   },
   "cctv_10209_2060": {
-    "mean_water_ratio": 0.20705630642361114,
-    "count": 4,
-    "last_update": 1788612403.3760052
+    "mean_water_ratio": 0.23739373320312504,
+    "count": 6,
+    "last_update": 1788624643.6978717
   },
   "cctv_10209_2061": {
-    "mean_water_ratio": 0.2506734375,
-    "count": 4,
-    "last_update": 1788612403.067737
+    "mean_water_ratio": 0.203045484375,
+    "count": 6,
+    "last_update": 1788624643.6141043
   },
   "cctv_10209_2063": {
-    "mean_water_ratio": 0.0547534375,
-    "count": 4,
-    "last_update": 1788612404.833145
+    "mean_water_ratio": 0.044350284375,
+    "count": 6,
+    "last_update": 1788624643.9979248
   },
   "cctv_10209_2065": {
-    "mean_water_ratio": 0.5703062855113638,
-    "count": 4,
-    "last_update": 1788612411.5066683
+    "mean_water_ratio": 0.46194809126420466,
+    "count": 6,
+    "last_update": 1788624651.4576445
   },
   "cctv_10209_2137": {
-    "mean_water_ratio": 0.15614583333333334,
-    "count": 1,
-    "last_update": 1788612404.5070808
+    "mean_water_ratio": 0.16287847222222224,
+    "count": 3,
+    "last_update": 1788624644.5331962
   }
 }

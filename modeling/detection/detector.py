@@ -115,7 +115,7 @@ class FloodDetection:
     lng: float
     area_name: str
     is_flood: bool
-    depth_cm: float
+    depth_label: str
     classification: str
     river_detected: bool
     trash_detected: bool
@@ -136,7 +136,7 @@ class FloodDetection:
             "lng": self.lng,
             "area_name": self.area_name,
             "is_flood": self.is_flood,
-            "depth_cm": self.depth_cm,
+            "depth_label": self.depth_label,
             "classification": self.classification,
             "river_detected": self.river_detected,
             "trash_detected": self.trash_detected,
@@ -203,7 +203,7 @@ class FloodDetectionPipeline:
         logger.info("Pipeline initialized successfully")
 
     def _run_cv_inference(self, frame_bytes: bytes) -> dict:
-        from detection.cv_model import CLASS_NAMES, CAUSE_NAMES, cause_to_text
+        from detection.cv_model import CLASS_NAMES, CAUSE_NAMES, DEPTH_BUCKET_LABELS, cause_to_text
 
         img = Image.open(io.BytesIO(frame_bytes)).convert("RGB")
         transform = transforms.Compose([
@@ -218,8 +218,9 @@ class FloodDetectionPipeline:
 
         flood_probs = torch.softmax(out["logits"], dim=1).cpu().numpy()[0]
         cause_probs = torch.sigmoid(out["cause_logits"]).cpu().numpy()[0]
-        depth_cm = float(out["depth_cm"].cpu().numpy()[0])
-        depth_cm = max(0.0, min(depth_cm, 200.0))
+        depth_probs = torch.softmax(out["depth_logits"], dim=1).cpu().numpy()[0]
+        depth_class = int(depth_probs.argmax())
+        depth_label = DEPTH_BUCKET_LABELS[depth_class]
 
         pred_class = int(flood_probs.argmax())
         confidence = float(flood_probs[pred_class])
@@ -237,7 +238,8 @@ class FloodDetectionPipeline:
             "class_name": CLASS_NAMES[pred_class],
             "flood_probability": round(flood_prob, 4),
             "confidence": round(confidence, 4),
-            "depth_estimate_cm": round(depth_cm, 1),
+            "depth_class": depth_class,
+            "depth_label": depth_label,
             "cause": cause_dict,
             "river_detected": river_detected,
             "trash_detected": trash_detected,
@@ -286,20 +288,20 @@ class FloodDetectionPipeline:
                 is_genuine
                 and is_real
                 and final_confidence >= 0.5
-                and cv_result["depth_estimate_cm"] >= 10
+                and cv_result["depth_class"] >= 0
             )
 
             from detection.classifier import classify_flood
             if is_flood:
                 cls_result = classify_flood(
-                    cv_result["depth_estimate_cm"],
+                    cv_result["depth_label"],
                     area_name,
                     cause_text=cv_result["cause_text"],
                     river_detected=cv_result["river_detected"],
                     trash_detected=cv_result["trash_detected"],
                 )
             else:
-                cls_result = classify_flood(0, area_name)
+                cls_result = classify_flood("normal", area_name)
                 cls_result.classification = "normal"
                 cls_result.status = "safe"
                 cls_result.status_label = "Aman"
@@ -316,7 +318,7 @@ class FloodDetectionPipeline:
                 lng=camera.lng,
                 area_name=area_name,
                 is_flood=is_flood,
-                depth_cm=cv_result["depth_estimate_cm"],
+                depth_label=cv_result["depth_label"],
                 classification=cls_result.classification,
                 river_detected=cls_result.river_detected,
                 trash_detected=cls_result.trash_detected,
@@ -367,7 +369,7 @@ class FloodDetectionPipeline:
             logger.info(f"\nFLOOD DETECTED ({len(flood_detections)} locations):")
             for d in flood_detections:
                 logger.info(f"  {d.notification}")
-                logger.info(f"    Camera: {d.camera_name} | {d.classification} | {d.depth_cm}cm | conf: {d.confidence:.2f}")
+                logger.info(f"    Camera: {d.camera_name} | {d.classification} | {d.depth_label} | conf: {d.confidence:.2f}")
                 logger.info(f"    Cause: {d.cause_text} (river={d.river_detected}, trash={d.trash_detected})")
         else:
             logger.info("\nNo flooding detected.")

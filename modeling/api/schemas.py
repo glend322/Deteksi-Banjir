@@ -26,7 +26,7 @@ class Classification(str, Enum):
 class CVResult(BaseModel):
     flood_detected: bool
     classification: str = Field(..., example="dangkal")
-    depth_estimate_cm: float = Field(..., ge=0, le=300)
+    depth_label: str = Field(..., example="sedang")
     confidence: float = Field(..., ge=0, le=1)
 
 
@@ -45,7 +45,7 @@ class CCTVFrameResult(BaseModel):
     stream_url: str
     flood_detected: bool
     classification: str
-    depth_estimate_cm: float
+    depth_label: str
     confidence: float
     area_name: str
     notification: str
@@ -77,14 +77,14 @@ class Coordinate(BaseModel):
 class RouteCalculateRequest(BaseModel):
     origin: Coordinate
     destination: Coordinate
-    vehicle_max_depth_cm: Optional[float] = 30.0
+    vehicle_max_depth: Optional[str] = "sedang"
 
 
 class RoadLabel(BaseModel):
     segment: str
     status: str
     color: str
-    depth_cm: float = 0.0
+    depth_label: str = "dangkal"
 
 
 class RouteOption(BaseModel):
@@ -132,7 +132,7 @@ class FloodZone(BaseModel):
     lng: float
     status: FloodStatus
     status_label: str
-    depth_cm: float
+    depth_label: str
     confidence: float
     source: str
     classification: str = ""
