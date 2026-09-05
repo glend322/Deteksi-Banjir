@@ -47,6 +47,9 @@ def build_user_profile(user: User, db: Session) -> UserProfile:
         avatar_url=user.avatar_url,
         vehicle_type=user.vehicle_type,
         vehicle_max_depth_cm=user.vehicle_max_depth_cm,
+        trust_score=user.trust_score if user.trust_score is not None else 50,
+        total_reports=user.total_reports if user.total_reports is not None else 0,
+        verified_reports=user.verified_reports if user.verified_reports is not None else 0,
         saved_locations=saved_locs,
         created_at=user.created_at
     )
