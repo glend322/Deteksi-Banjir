@@ -29,6 +29,20 @@
 - **Content:** Current weather + hourly forecast for Semarang
 - **Purpose:** Rainfall data for flood prediction
 
+### CCTV Pantau Semarang
+- **Source:** https://pantausemar.semarangkota.go.id/
+- **Stream:** HLS via https://livepantau.semarangkota.go.id/
+- **License:** Government Open Data (Pemkot Semarang)
+- **Last scraped:** September 2026
+- **Categories:**
+  - `rawan_genangan` (UUID: df69dbea-87c9-4d79-9ddc-f388c33f2dc9) — flood-prone areas
+  - `sungai` (UUID: 194fd5d9-098f-4dbe-93da-8288c6761bf0) — river monitoring
+  - `pompa_air` (UUID: 5b5b7e51-3a2e-446f-8fae-50d8e9e7196d) — water pumps
+- **Total cameras:** 77 (as of Sept 2026)
+- **Fields:** cctv_id, name, lat, lng, stream_url (HLS .m3u8), category
+- **Purpose:** Real-time flood detection input for CV model
+- **Scrape rate:** Max 1 req/det per domain (Rule 6)
+
 ## Processed Data (data/processed/)
 
 ### Road Graph
@@ -54,7 +68,11 @@
 - **Content:** Current weather conditions + forecast
 - **Purpose:** Real-time rainfall input for detection pipeline
 
-
+### Camera Baselines
+- **File:** `camera_baselines.json`
+- **Content:** Baseline water levels per CCTV camera
+- **Purpose:** False positive filter - compares current water level vs baseline
+- **Updated:** Automatically after each scan
 
 ## Training Data (data/training/)
 
@@ -64,27 +82,15 @@
 - **Count:** 289 images (224x224)
 - **Purpose:** Positive class for CV flood detection model
 
-### Non-Flood Images (Street View)
+### Non-Flood Images
 - **Directory:** `training/nonflood/`
-- **Source:** Google Street View dataset (Kaggle: paulchambaz/google-street-view)
-- **Count:** 300 images
-- **Content:** Street-level images of roads, buildings, urban areas from various cities
-- **Selection:** Filtered from 10,000 images based on sharpness, brightness, color diversity, and file size
+- **Sources:**
+  1. Google Street View dataset (Kaggle: paulchambaz/google-street-view) - 300 images
+  2. Real CCTV frames from Pantau Semarang - 48 images (labeled as non-flood baseline)
+- **Total Count:** 348 images
 - **Purpose:** Negative class for CV flood detection model
 
-## Sample Data (data/sample/)
-
-### Test Cameras
-- **File:** `test_cameras.json`
-- **Content:** 8 CCTV cameras with expected flood detection results
-- **Purpose:** Pipeline testing, integration testing
-
-### Flood Zones
-- **File:** `flood_zones.json`
-- **Content:** 4 sample flood zones with severity levels
-- **Purpose:** Route engine testing, map visualization testing
-
-### Test Routes
-- **File:** `test_routes.json`
-- **Content:** 3 route calculation test scenarios
-- **Purpose:** Safe route engine testing
+### Auto Labels
+- **File:** `auto_labels.json`
+- **Content:** Auto-generated labels for scraped CCTV frames based on water detection heuristics
+- **Note:** Not used for training - actual labels are all non-flood (baseline)

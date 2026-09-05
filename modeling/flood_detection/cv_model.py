@@ -1,9 +1,10 @@
 """
-CV Flood Detection Model — CNN Architecture
+CV Flood Detection Model — Multi-Head CNN Architecture
 
-Dual-head CNN backbone:
+Three-head CNN backbone:
   - Classification head: flood / no_flood
   - Regression head: water depth estimation (cm)
+  - Cause detection head: river / trash (multi-label)
 
 Supports: ResNet50, EfficientNet-B0, MobileNetV3-Small
 """
@@ -13,6 +14,7 @@ import torchvision.models as models
 
 
 CLASS_NAMES = ["no_flood", "flood"]
+CAUSE_NAMES = ["river", "trash"]
 DEPTH_BUCKETS = [(0, 20), (20, 40), (40, 200)]
 DEPTH_BUCKET_LABELS = ["dangkal", "sedang", "dalam"]
 DEPTH_BUCKET_COLORS = ["#F59E0B", "#F97316", "#EF4444"]
@@ -25,9 +27,9 @@ BACKBONE_REGISTRY = {
 
 
 class FloodClassifier(nn.Module):
-    """CNN backbone with classification + depth regression heads."""
+    """CNN backbone with three heads: flood cls, depth reg, cause detection."""
 
-    def __init__(self, num_classes: int = 2, pretrained: bool = True, backbone: str = "resnet50"):
+    def __init__(self, num_classes: int = 2, num_causes: int = 2, pretrained: bool = True, backbone: str = "resnet50"):
         super().__init__()
         if backbone not in BACKBONE_REGISTRY:
             raise ValueError(f"Unknown backbone: {backbone}. Choose from {list(BACKBONE_REGISTRY.keys())}")
@@ -60,11 +62,24 @@ class FloodClassifier(nn.Module):
             nn.Linear(128, 1),
         )
 
+        self.cause_classifier = nn.Sequential(
+            nn.Dropout(0.3),
+            nn.Linear(feature_dim, 128),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(128, num_causes),
+        )
+
     def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
         features = self.backbone(x)
         logits = self.classifier(features)
         depth_cm = self.depth_regressor(features).squeeze(-1)
-        return {"logits": logits, "depth_cm": depth_cm}
+        cause_logits = self.cause_classifier(features)
+        return {
+            "logits": logits,
+            "depth_cm": depth_cm,
+            "cause_logits": cause_logits,
+        }
 
 
 def depth_to_classification(depth_cm: float) -> str:
@@ -103,3 +118,17 @@ def classification_to_color(classification: str) -> str:
         "dalam": "#EF4444",
     }
     return mapping.get(classification, "#10B981")
+
+
+def cause_to_text(cause_probs: dict[str, float], threshold: float = 0.5) -> str:
+    """Map cause probabilities to human-readable text."""
+    detected = [name for name, prob in cause_probs.items() if prob >= threshold]
+
+    if "river" in detected and "trash" in detected:
+        return "sungai meluap dan sampah menyumbat"
+    elif "river" in detected:
+        return "sungai meluap"
+    elif "trash" in detected:
+        return "sampah menyumbat saluran"
+    else:
+        return "genangan air hujan"

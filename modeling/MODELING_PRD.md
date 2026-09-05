@@ -45,7 +45,7 @@ Modeling memiliki **2 capability utama** + modul pendukung:
 | # | Capability | Deskripsi |
 |---|---|---|
 | **1** | **Safe Route Engine** | Kalkulasi rute aman berdasarkan lokasi real-time user, dengan penalty untuk jalan terdampak banjir + rekomendasi evakuasi terdekat |
-| **2** | **CCTV Flood Detection Pipeline** | Pipeline end-to-end: CCTV Semarang → CV detection → verifikasi false positive → klasifikasi tingkat banjir (dangkal/sedang/dalam) → output notifikasi |
+| **2** | **CCTV Flood Detection Pipeline** | Pipeline end-to-end: CCTV Semarang → CV detection (banjir + penyebab: sungai/sampah) → verifikasi false positive → klasifikasi tingkat banjir (dangkal/sedang/dalam) → output notifikasi |
 
 **Modul Pendukung:**
 - Data Scraping Pipeline (BMKG, OSM, Kaggle)
@@ -229,11 +229,13 @@ Mendeteksi banjir secara otomatis dari CCTV Kota Semarang, memverifikasi apakah 
 │      Categories: rawan_genangan, sungai, pompa_air          │
 │      Output: frame (JPEG bytes) + metadata (nama, lat/lng)  │
 │                          ↓                                  │
-│  [2] CV Flood Detection                                     │
+│  [2] CV Detection (Banjir + Penyebab)                       │
 │      Model: CNN (ResNet50 / MobileNetV3)                    │
 │      Input: image frame                                     │
-│      Output: flood_detected (bool), depth_cm (float),       │
-│              confidence (float), class probabilities        │
+│      Multi-head Output:                                     │
+│        - Flood: flood_detected (bool), depth_cm (float)     │
+│        - Cause: river_detected, trash_detected (bool)       │
+│        - Confidence: flood_conf, cause_conf                 │
 │                          ↓                                  │
 │  [3] Verifier (False Positive Filter)                       │
 │      Checks:                                               │
@@ -244,15 +246,16 @@ Mendeteksi banjir secara otomatis dari CCTV Kota Semarang, memverifikasi apakah 
 │      Output: is_genuine_flood (bool), reasons (list)        │
 │                          ↓                                  │
 │  [4] Classifier (Klasifikasi Tingkat Banjir)                │
-│      Input: depth_cm dari CV model                          │
+│      Input: depth_cm + cause dari CV model                  │
 │      Output:                                                │
 │        - dangkal  : depth < 20 cm                           │
 │        - sedang   : depth 20-40 cm                          │
 │        - dalam    : depth > 40 cm                           │
 │                          ↓                                  │
 │  [5] Output / Notifikasi                                    │
-│      Format: "Daerah {nama_daerah} banjir di tingkat        │
-│               {dangkal/sedang/dalam}"                       │
+│      Format: "Daerah {nama_daerah} banjir tingkat           │
+│               {dangkal/sedang/dalam}.                       │
+│               Penyebab {penyebab}."                         │
 │      + Simpan ke backend database                           │
 │      + Kirim alert ke frontend                              │
 │                                                             │
@@ -290,13 +293,14 @@ class CCTVFrame:
     category: str        # rawan_genangan / sungai / pompa_air
 ```
 
-### 4.4 Stage 2 — CV Flood Detection Model
+### 4.4 Stage 2 — CV Detection Model (Banjir + Penyebab)
 
 **Architecture:**
 - Base: Pre-trained CNN backbone (pilihan: ResNet50, EfficientNet-B0, MobileNetV3-Small)
-- Dual-head output:
-  - **Classification head**: 2 kelas (flood / no_flood)
-  - **Regression head**: estimasi kedalaman air (cm)
+- Multi-head output:
+  - **Flood classification head**: 2 kelas (flood / no_flood)
+  - **Depth regression head**: estimasi kedalaman air (cm)
+  - **Cause detection head**: multi-label (river / trash)
 
 **Input:** Image 224x224 RGB
 **Output:**
@@ -304,10 +308,22 @@ class CCTVFrame:
 {
   "flood_detected": true,
   "depth_estimate_cm": 35.2,
-  "confidence": 0.89,
-  "probabilities": {"no_flood": 0.11, "flood": 0.89}
+  "flood_confidence": 0.89,
+  "flood_probabilities": {"no_flood": 0.11, "flood": 0.89},
+  "cause": {
+    "river_detected": true,
+    "trash_detected": false,
+    "river_confidence": 0.82,
+    "trash_confidence": 0.15
+  }
 }
 ```
+
+**Cause Classes:**
+| Cause | Deskripsi | Indikator Visual |
+|---|---|---|
+| `river` | Sungai meluap / debit air tinggi | Air berwarna cokelat, permukaan air tinggi, deras |
+| `trash` | Sampah menyumbat aliran air | Tumpukan sampah di saluran/parit |
 
 **Training Data:**
 - Kaggle flood detection datasets
@@ -315,8 +331,9 @@ class CCTVFrame:
 - Augmented data: water-color overlay pada gambar jalan normal
 
 **Target Metrics:**
-- Accuracy: > 85%
+- Flood detection accuracy: > 85%
 - Depth estimation MAE: < 10 cm
+- Cause detection accuracy: > 75%
 
 ### 4.5 Stage 3 — Verifier (False Positive Filter)
 
@@ -344,7 +361,7 @@ class VerificationResult:
 
 ### 4.6 Stage 4 — Classifier (Klasifikasi Tingkat Banjir)
 
-**Input:** `depth_cm` dari CV model + `is_genuine_flood` dari verifier
+**Input:** `depth_cm` + `cause` dari CV model + `is_genuine_flood` dari verifier
 
 **Klasifikasi:**
 
@@ -358,14 +375,20 @@ class VerificationResult:
 
 **Format Notifikasi:**
 ```
-Daerah {nama_daerah} banjir di tingkat {dangkal|sedang|dalam}
+Daerah {nama_daerah} banjir tingkat {dangkal|sedang|dalam}. Penyebab {penyebab}.
 ```
+
+**Penyebab (berdasarkan CV detection):**
+- Sungai meluap → "sungai meluap"
+- Sampah menyumbat → "sampah menyumbat saluran"
+- Keduanya terdeteksi → "sungai meluap dan sampah menyumbat"
+- Tidak ada terdeteksi → "genangan air hujan"
 
 **Contoh:**
 ```
-Daerah Kaligawe banjir di tingkat dalam
-Daerah Genuk banjir di tingkat sedang
-Daerah Mangkang banjir di tingkat dangkal
+Daerah Kaligawe banjir tingkat dalam. Penyebab sungai meluap.
+Daerah Genuk banjir tingkat sedang. Penyebab sampah menyumbat saluran.
+Daerah Mangkang banjir tingkat dangkal. Penyebab genangan air hujan.
 ```
 
 **Full Detection Result:**
@@ -380,9 +403,12 @@ class FloodDetection:
     is_flood: bool
     depth_cm: float
     classification: str      # "dangkal" | "sedang" | "dalam"
+    river_detected: bool
+    trash_detected: bool
+    cause_text: str          # "sungai meluap" / "sampah menyumbat" / dll
     confidence: float
     is_false_positive: bool
-    notification: str        # "Daerah X banjir di tingkat Y"
+    notification: str        # "Daerah X banjir tingkat Y. Penyebab Z."
     timestamp: float
 ```
 
@@ -404,14 +430,14 @@ Worker berjalan secara periodik:
 ```
 modeling/
 ├── cctv_client.py            # Scraping CCTV + extract frame dari HLS
-├── cv_model.py               # Arsitektur CNN flood detection
+├── cv_model.py               # Arsitektur CNN: flood detection + cause detection (river/trash)
 ├── verifier.py               # False positive filter
-├── classifier.py             # Klasifikasi: dangkal/sedang/dalam
+├── classifier.py             # Klasifikasi: dangkal/sedang/dalam + cause text
 ├── detector.py               # Pipeline utama: CCTV → CV → Verify → Classify → Output
 ├── area_mapping.py           # Reverse geocode: lat/lng → nama daerah
 ├── worker.py                 # Background worker untuk continuous monitoring
 ├── checkpoints/
-│   └── best.pt              # Saved model weights
+│   └── best.pt              # Saved model weights (flood + cause)
 ```
 
 ---
@@ -445,11 +471,11 @@ Exposed untuk integrasi dengan backend utama.
 ```
 POST /api/classify-image
   → Input: image file
-  → Output: { flood_detected, classification, depth_cm, confidence }
+  → Output: { flood_detected, classification, depth_cm, river_detected, trash_detected, confidence }
 
 POST /api/scan-cctv
   → Input: { categories, camera_ids }
-  → Output: list of detections dari semua CCTV
+  → Output: list of detections dari semua CCTV (termasuk cause detection)
 
 POST /api/calculate-route
   → Input: { origin, destination, vehicle_max_depth }
@@ -540,7 +566,7 @@ Harus kompatibel dengan `SAFEROUTE_DATA.routes` di `js/data.js`:
 Format notifikasi dari pipeline CCTV:
 
 ```
-Daerah Kaligawe banjir di tingkat dalam
+Daerah Kaligawe banjir tingkat dalam. Penyebab sungai meluap.
 ```
 
 Disimpan ke database dengan field:
@@ -550,9 +576,11 @@ Disimpan ke database dengan field:
 - `lat`, `lng`
 - `estimated_depth_cm`
 - `classification`: dangkal/sedang/dalam
+- `river_detected`: bool
+- `trash_detected`: bool
+- `cause_text`: "sungai meluap" / "sampah menyumbat" / dll
 - `confidence`
 - `alert_needed`: true
-- `cause`: "Deteksi CCTV AI Real-Time"
 
 ---
 
@@ -567,9 +595,9 @@ modeling/
 ├── .gitignore                    # Ignore .env, __pycache__, checkpoints
 │
 ├── cctv_client.py                # Stage 1: Scraping CCTV + extract frame
-├── cv_model.py                   # Stage 2: CNN flood detection architecture
+├── cv_model.py                   # Stage 2: CNN flood + cause detection (river/trash)
 ├── verifier.py                   # Stage 3: False positive filter
-├── classifier.py                 # Stage 4: Klasifikasi dangkal/sedang/dalam
+├── classifier.py                 # Stage 4: Klasifikasi dangkal/sedang/dalam + cause
 ├── detector.py                   # Stage 5: Pipeline utama (orchestrator)
 ├── area_mapping.py               # Reverse geocode → nama daerah
 ├── route_engine.py               # Safe route: A* + flood penalty
@@ -615,12 +643,12 @@ modeling/
 - [ ] Document semua sumber di `data/README.md`
 
 ### Phase 2 — CV Model (Day 2-3)
-- [ ] Build `cv_model.py` — arsitektur CNN (MobileNetV3 atau ResNet50)
-- [ ] Build training pipeline — train di flood image dataset
-- [ ] Target: accuracy > 85%, depth MAE < 10cm
+- [ ] Build `cv_model.py` — arsitektur CNN multi-head (MobileNetV3 atau ResNet50)
+- [ ] Build training pipeline — train flood + cause detection (river/trash)
+- [ ] Target: flood accuracy > 85%, cause accuracy > 75%, depth MAE < 10cm
 - [ ] Save checkpoint ke `checkpoints/best.pt`
 - [ ] Build `verifier.py` — false positive filter (rule-based)
-- [ ] Build `classifier.py` — mapping depth → dangkal/sedang/dalam
+- [ ] Build `classifier.py` — mapping depth → dangkal/sedang/dalam + cause text
 
 ### Phase 3 — Pipeline & Route Engine (Day 3-4)
 - [ ] Build `detector.py` — orchestrate CCTV → CV → Verify → Classify → Output
@@ -635,7 +663,7 @@ modeling/
 - [ ] Test API locally
 
 ### Phase 5 — Integration & Demo (Day 5)
-- [ ] End-to-end demo: CCTV frame → CV → notifikasi "Daerah X banjir di tingkat Y"
+- [ ] End-to-end demo: CCTV frame → CV → notifikasi "Daerah X banjir tingkat Y. Penyebab Z."
 - [ ] End-to-end demo: user GPS → 3 rute opsi + evakuasi terdekat
 - [ ] Output format compatible dengan `SAFEROUTE_DATA`
 - [ ] Write README
@@ -646,10 +674,11 @@ modeling/
 
 | Metric | Target |
 |---|---|
-| CV classifier accuracy | > 85% |
+| CV flood detection accuracy | > 85% |
+| CV cause detection accuracy | > 75% |
 | CV depth estimation MAE | < 10 cm |
 | False positive filter precision | > 90% |
 | API response time | < 500ms |
 | CCTV scan per cycle | < 30 detik untuk semua camera |
 | Route calculation | < 200ms |
-| Notifikasi format | "Daerah X banjir di tingkat Y" sesuai spec |
+| Notifikasi format | "Daerah X banjir tingkat Y. Penyebab Z." sesuai spec |
