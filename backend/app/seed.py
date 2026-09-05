@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from app.core.database import SessionLocal, Base, engine, init_postgis
 from app.core.security import get_password_hash
 from app.models.user import User, SavedLocation, TripHistory
-from app.models.flood import FloodPoint, FloodZone, EvacuationPoint
+from app.models.flood import FloodPoint, FloodZone, EvacuationPoint, EnvironmentalRiskPoint
 from app.models.report import FloodReport
 from app.models.weather import Alert, WeatherForecastCache
 
@@ -29,6 +29,7 @@ def seed_database():
         db.query(FloodPoint).delete()
         db.query(FloodZone).delete()
         db.query(EvacuationPoint).delete()
+        db.query(EnvironmentalRiskPoint).delete()
         db.query(Alert).delete()
         db.query(WeatherForecastCache).delete()
         db.query(User).delete()
@@ -420,12 +421,145 @@ def seed_database():
                 geom=geom
             ))
 
+        # 10. Seed Environmental Risk Points (PRD Bab 4 & 6.2: Infrastruktur Pengendali & Risiko Lingkungan)
+        env_risks_data = [
+            {
+                "slug": "env-polder-tawang",
+                "name": "Stasiun Pompa Polder Tawang",
+                "category": "polder_pump",
+                "category_label": "Stasiun Pompa Pengendali Banjir",
+                "risk_level": "optimal",
+                "status": "Aktif 4/4 Pompa (Kondisi Prima)",
+                "capacity_or_condition": "Kapasitas debit 6,0 m³/detik",
+                "description": "Menangani pembuangan air area Kota Lama dan Stasiun Kereta Api Tawang menuju Kali Semarang.",
+                "icon": "pump",
+                "color": "#10B981",
+                "lat": -6.9688,
+                "lng": 110.4285
+            },
+            {
+                "slug": "env-polder-banger",
+                "name": "Stasiun Pompa Polder Banger",
+                "category": "polder_pump",
+                "category_label": "Stasiun Pompa Pengendali Banjir",
+                "risk_level": "optimal",
+                "status": "Aktif 5/6 Pompa (1 Standby)",
+                "capacity_or_condition": "Kapasitas debit 10,0 m³/detik",
+                "description": "Menjaga ketinggian muka air kawasan Semarang Timur dan perkampungan sekitar Kali Banger.",
+                "icon": "pump",
+                "color": "#10B981",
+                "lat": -6.9632,
+                "lng": 110.4420
+            },
+            {
+                "slug": "env-pompa-tenggang",
+                "name": "Rumah Pompa Kali Tenggang",
+                "category": "polder_pump",
+                "category_label": "Stasiun Pompa Utama Muara",
+                "risk_level": "medium",
+                "status": "Siaga Penuh 6/6 Pompa Menyala",
+                "capacity_or_condition": "Kapasitas debit 12,0 m³/detik",
+                "description": "Infrastruktur vital pengendali banjir rob & limpasan kawasan Genuk, Muktiharjo, dan Kaligawe.",
+                "icon": "pump",
+                "color": "#F59E0B",
+                "lat": -6.9455,
+                "lng": 110.4615
+            },
+            {
+                "slug": "env-pompa-waru",
+                "name": "Rumah Pompa Pasar Waru",
+                "category": "polder_pump",
+                "category_label": "Stasiun Pompa Sekunder",
+                "risk_level": "optimal",
+                "status": "Aktif 2/2 Pompa",
+                "capacity_or_condition": "Kapasitas debit 3,5 m³/detik",
+                "description": "Mencegah genangan di area pasar dan pemukiman Gayamsari.",
+                "icon": "pump",
+                "color": "#10B981",
+                "lat": -6.9780,
+                "lng": 110.4490
+            },
+            {
+                "slug": "env-sampah-kaligawe",
+                "name": "Titik Tumpukan Sampah Jembatan Kaligawe",
+                "category": "river_waste",
+                "category_label": "Titik Tumpukan Sampah Sungai",
+                "risk_level": "high",
+                "status": "Tersumbat 55% (Aliran Melambat)",
+                "capacity_or_condition": "Volume sampah ~15 m³ menghambat pilar jembatan",
+                "description": "Akumulasi ranting pohon dan sampah plastik menghambat laju aliran air DAS Kali Tenggang menuju muara.",
+                "icon": "trash-2",
+                "color": "#EF4444",
+                "lat": -6.9530,
+                "lng": 110.4585
+            },
+            {
+                "slug": "env-sampah-muara-bkt",
+                "name": "Titik Penumpukan Sampah Muara BKT",
+                "category": "river_waste",
+                "category_label": "Titik Tumpukan Sampah Sungai",
+                "risk_level": "medium",
+                "status": "Tersumbat 30% di Pintu Air",
+                "capacity_or_condition": "Pembersihan berkala oleh Dinas PU/BBWS",
+                "description": "Muara Banjir Kanal Timur mengalami hambatan sedimentasi dan enceng gondok musiman.",
+                "icon": "trash-2",
+                "color": "#F59E0B",
+                "lat": -6.9405,
+                "lng": 110.4500
+            },
+            {
+                "slug": "env-drainase-raden-patah",
+                "name": "Saluran Drainase Kritis Jl. Raden Patah",
+                "category": "drainage_choke",
+                "category_label": "Saluran Drainase Kritis",
+                "risk_level": "high",
+                "status": "Sedimen Pasir & Tanah Capai 45 cm",
+                "capacity_or_condition": "Kapasitas tampung berkurang 60%",
+                "description": "Saluran sekunder mengalami sedimentasi parah, menyebabkan air mudah meluap ke badan jalan saat hujan deras.",
+                "icon": "droplets",
+                "color": "#EF4444",
+                "lat": -6.9670,
+                "lng": 110.4350
+            },
+            {
+                "slug": "env-rob-tambak-lorok",
+                "name": "Titik Kerawanan Rob Tambak Lorok",
+                "category": "coastal_tide",
+                "category_label": "Titik Pasang Air Laut (Rob)",
+                "risk_level": "high",
+                "status": "Muka Air Laut Pasang +1.15 mdpl",
+                "capacity_or_condition": "Limpasan tanggul penahan laut pada pasang tinggi",
+                "description": "Kawasan permukiman pesisir langsung berbatasan dengan laut Jawa, rentan limpasan pasang rob astronomis.",
+                "icon": "waves",
+                "color": "#F97316",
+                "lat": -6.9420,
+                "lng": 110.4380
+            }
+        ]
+
+        for env in env_risks_data:
+            geom = from_shape(Point(env["lng"], env["lat"]), srid=4326)
+            db.add(EnvironmentalRiskPoint(
+                slug=env["slug"],
+                name=env["name"],
+                category=env["category"],
+                category_label=env["category_label"],
+                risk_level=env["risk_level"],
+                status=env["status"],
+                capacity_or_condition=env["capacity_or_condition"],
+                description=env["description"],
+                icon=env["icon"],
+                color=env["color"],
+                geom=geom
+            ))
+
         db.commit()
         print("✅ Seeding database berhasil selesai!")
         print("   - Akun Demo: andi.pratama@gmail.com / password123")
         print("   - Titik Pantau Banjir: 7 titik")
         print("   - Poligon Area Banjir: 3 zona (Kaligawe, Semarang Utara, Tugu)")
         print("   - Posko Evakuasi: 3 lokasi (MAJT, Camat Genuk, RSI Sultan Agung)")
+        print("   - Faktor Risiko Lingkungan: 8 titik (Pompa Polder, Sampah Sungai, Rob)")
         print("   - Peringatan Aktif: 4 alert")
     except Exception as e:
         db.rollback()
@@ -436,4 +570,5 @@ def seed_database():
 
 if __name__ == "__main__":
     seed_database()
+
 

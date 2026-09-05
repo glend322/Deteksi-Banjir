@@ -1,18 +1,27 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from contextlib import asynccontextmanager
 import os
 
 from app.core.config import settings
 from app.core.database import Base, engine, init_postgis
+from app.core.scheduler import start_background_scheduler, stop_background_scheduler
 from app.api.router import api_router
 
-# Inisialisasi PostGIS & Skema Database
-try:
-    init_postgis()
-    Base.metadata.create_all(bind=engine)
-except Exception as e:
-    print(f"[WARN] Database initialization note (will retry on connection): {e}")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Inisialisasi DB & Background Scheduler
+    try:
+        init_postgis()
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"[WARN] Database initialization note: {e}")
+    
+    start_background_scheduler()
+    yield
+    # Shutdown: Matikan Background Scheduler
+    stop_background_scheduler()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -20,7 +29,8 @@ app = FastAPI(
     version="1.0.0",
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    lifespan=lifespan
 )
 
 # Konfigurasi CORS

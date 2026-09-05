@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, BackgroundTasks, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from geoalchemy2.shape import from_shape
@@ -12,15 +12,17 @@ from app.core.database import get_db
 from app.models.report import FloodReport
 from app.models.flood import FloodPoint
 from app.models.user import User
-from app.schemas.report import FloodReportResponse
+from app.schemas.report import FloodReportResponse, ReportConfirmResponse
+from app.services.ai_service import process_ai_verification, confirm_report_by_peer
 
 router = APIRouter()
 
 UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-@router.post("", response_model=FloodReportResponse, status_code=201)
+@router.post("", response_model=FloodReportResponse, status_code=status.HTTP_201_CREATED)
 async def submit_flood_report(
+    background_tasks: BackgroundTasks,
     location_name: str = Form(..., description="Nama lokasi genangan"),
     address: Optional[str] = Form(None),
     depth_category: str = Form("20-40 cm"),
@@ -36,7 +38,7 @@ async def submit_flood_report(
     try:
         photo_url = None
         if photo and hasattr(photo, "filename") and photo.filename:
-            ext = os.path.splitext(photo.filename)[1]
+            ext = os.path.splitext(photo.filename)[1] or ".jpg"
             unique_name = f"report_{uuid.uuid4().hex[:10]}{ext}"
             file_path = os.path.join(UPLOAD_DIR, unique_name)
             
@@ -45,7 +47,7 @@ async def submit_flood_report(
             
             photo_url = f"/uploads/{unique_name}"
 
-        # Validasi user_id: jika user_id tidak valid di DB, abaikan agar tidak Foreign Key Error
+        # Validasi user_id jika ada
         valid_user_id = None
         if user_id and user_id > 0:
             existing_user = db.query(User).filter(User.id == user_id).first()
@@ -64,36 +66,19 @@ async def submit_flood_report(
             condition=condition,
             description=description,
             photo_url=photo_url or "/assets/cctv_kaligawe.jpg",
-            is_verified=True,
-            verification_note="Diverifikasi AI (Deteksi Genangan Air & Riwayat Spasial)",
-            ai_confidence=92,
+            is_verified=False,
+            verification_status="pending",
+            verification_note="Sedang diproses oleh pipeline AI & analisis cuaca...",
+            ai_confidence=60,
+            confirmations_count=1,
             geom=geom
         )
         db.add(report)
         db.commit()
         db.refresh(report)
 
-        # Buat titik pantau baru di peta PostGIS
-        status_val = "impassable" if depth_cm >= 40 else "flooded" if depth_cm >= 20 else "watch"
-        status_lbl = condition or ("Tidak Dapat Dilalui" if status_val == "impassable" else "Tergenang" if status_val == "flooded" else "Waspada")
-
-        new_point = FloodPoint(
-            slug=f"loc-report-{report.id}",
-            name=location_name,
-            area="Semarang (Laporan Komunitas)",
-            status=status_val,
-            status_label=status_lbl,
-            depth_cm=depth_cm,
-            source="Laporan Warga (Terverifikasi AI)",
-            confidence=92,
-            image_url=report.photo_url,
-            recommendation="Genangan terdeteksi dari laporan warga terverifikasi. Harap waspada.",
-            cause="Limpasan air & curah hujan",
-            vehicles_allowed=["Mobil SUV", "Truk"] if status_val != "impassable" else ["Hanya SAR"],
-            geom=geom
-        )
-        db.add(new_point)
-        db.commit()
+        # Jalankan verifikasi AI di background
+        background_tasks.add_task(process_ai_verification, report.id, db)
 
         return FloodReportResponse(
             id=report.id,
@@ -106,8 +91,10 @@ async def submit_flood_report(
             description=report.description,
             photo_url=report.photo_url,
             is_verified=report.is_verified,
+            verification_status=report.verification_status,
             verification_note=report.verification_note,
             ai_confidence=report.ai_confidence,
+            confirmations_count=report.confirmations_count,
             lat=lat,
             lng=lng,
             created_at=report.created_at
@@ -116,6 +103,23 @@ async def submit_flood_report(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=f"Gagal memproses laporan: {str(e)}")
+
+@router.post("/{report_id}/confirm", response_model=ReportConfirmResponse)
+def confirm_flood_report(report_id: int, db: Session = Depends(get_db)):
+    """
+    Peer Verification: Warga lain di sekitar lokasi mengonfirmasi kebenaran genangan air.
+    """
+    result = confirm_report_by_peer(report_id, db)
+    if not result.get("success"):
+        raise HTTPException(status_code=404, detail=result.get("message", "Laporan tidak ditemukan"))
+
+    return ReportConfirmResponse(
+        message="Terima kasih! Konfirmasi Anda membantu memvalidasi peta banjir warga.",
+        report_id=result["report_id"],
+        confirmations_count=result["confirmations_count"],
+        is_verified=result["is_verified"],
+        status=result["verification_status"]
+    )
 
 @router.get("", response_model=List[FloodReportResponse])
 def get_flood_reports(limit: int = 20, db: Session = Depends(get_db)):
@@ -130,8 +134,10 @@ def get_flood_reports(limit: int = 20, db: Session = Depends(get_db)):
         FloodReport.description,
         FloodReport.photo_url,
         FloodReport.is_verified,
+        FloodReport.verification_status,
         FloodReport.verification_note,
         FloodReport.ai_confidence,
+        FloodReport.confirmations_count,
         FloodReport.created_at,
         func.ST_Y(FloodReport.geom).label("lat"),
         func.ST_X(FloodReport.geom).label("lng")
@@ -149,11 +155,14 @@ def get_flood_reports(limit: int = 20, db: Session = Depends(get_db)):
             description=r.description,
             photo_url=r.photo_url,
             is_verified=r.is_verified,
+            verification_status=r.verification_status or "pending",
             verification_note=r.verification_note,
-            ai_confidence=r.ai_confidence,
+            ai_confidence=r.ai_confidence or 0,
+            confirmations_count=r.confirmations_count or 0,
             lat=r.lat,
             lng=r.lng,
             created_at=r.created_at
         )
         for r in results
     ]
+

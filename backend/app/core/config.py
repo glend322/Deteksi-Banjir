@@ -12,6 +12,13 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str = "postgresql://postgres:postgrespassword@localhost:5432/saferoute_db"
 
+    # OSRM Routing Engine (100% Free & Open Source)
+    OSRM_BASE_URL: str = "http://router.project-osrm.org"
+    ROUTING_TIMEOUT_SECONDS: float = 4.0
+
+    # AI / ML Modeling Service
+    MODELING_API_URL: str = "http://localhost:8001"
+
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["*"]
 

@@ -62,3 +62,26 @@ class EvacuationPoint(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+
+class EnvironmentalRiskPoint(Base):
+    __tablename__ = "environmental_risk_points"
+
+    id = Column(Integer, primary_key=True, index=True)
+    slug = Column(String(100), unique=True, index=True, nullable=True) # e.g. "polder-tawang"
+    name = Column(String(255), nullable=False) # e.g. "Stasiun Pompa Polder Tawang"
+    category = Column(String(50), nullable=False, index=True) # polder_pump, river_waste, drainage_choke, coastal_tide
+    category_label = Column(String(100), nullable=True) # e.g. "Stasiun Pompa Pengendali Banjir"
+    risk_level = Column(String(50), default="medium", index=True) # optimal, low, medium, high
+    status = Column(String(100), nullable=False) # e.g. "Aktif 4/4 Pompa", "Tersumbat 60%"
+    capacity_or_condition = Column(String(255), nullable=True) # e.g. "Kapasitas 6 m³/detik"
+    description = Column(Text, nullable=True)
+    icon = Column(String(50), default="pump") # pump, trash-2, droplets, waves
+    color = Column(String(20), default="#10B981")
+
+    # PostGIS Point (SRID 4326)
+    geom = Column(Geometry(geometry_type='POINT', srid=4326), nullable=False)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
+
+

@@ -20,8 +20,10 @@ class FloodReport(Base):
 
     # Status Verifikasi AI / Petugas (PRD 6.4)
     is_verified = Column(Boolean, default=False)
+    verification_status = Column(String(50), default="pending") # pending, verified, unverified, flagged
     verification_note = Column(String(255), nullable=True)
     ai_confidence = Column(Integer, default=0)
+    confirmations_count = Column(Integer, default=0) # Konfirmasi / Upvote warga sekitar
 
     # PostGIS Point (SRID 4326)
     geom = Column(Geometry(geometry_type='POINT', srid=4326), nullable=False)
