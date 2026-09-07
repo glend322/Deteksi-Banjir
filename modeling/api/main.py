@@ -1,19 +1,46 @@
+"""
+FastAPI App — Modeling API Endpoints
+
+Endpoints:
+  POST /api/classify-image     — Classify a single image
+  POST /api/scan-cctv          — Scan all CCTV cameras
+  POST /api/calculate-route    — Calculate safe routes
+  GET  /api/flood-zones        — Get active flood zones
+  GET  /api/evacuation-points  — Get evacuation points
+  GET  /health                 — Health check
+"""
+import io
+import json
+import logging
+import time
+from pathlib import Path
+
+import cv2
 import numpy as np
+import torch
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from PIL import Image
+from torchvision import transforms
 
 from schemas import (
     CVResult,
-    PredictRequest,
-    FloodPrediction,
-    ReportInput,
-    VerificationResult,
-    FloodZoneResponse,
+    CCTVScanRequest,
+    CCTVScanResponse,
+    CCTVFrameResult,
+    RouteCalculateRequest,
+    RouteCalculateResponse,
+    RouteOption,
+    RoadLabel,
     FloodZone,
+    FloodZoneResponse,
+    EvacuationResult,
 )
-from dependencies import get_models, get_data, get_feature_cols
+from dependencies import get_cv_model
 
-app = FastAPI(title="SafeRoute Modeling API", version="0.1.0")
+logger = logging.getLogger(__name__)
+
+app = FastAPI(title="SafeRoute Modeling API", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -22,180 +49,242 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-RISK_MAP = {0: "normal", 1: "waspada", 2: "tergenang"}
+
+def _run_cv_inference(frame_bytes: bytes) -> dict:
+    model, device = get_cv_model()
+
+    img = Image.open(io.BytesIO(frame_bytes)).convert("RGB")
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+    tensor = transform(img).unsqueeze(0).to(device)
+
+    with torch.no_grad():
+        out = model(tensor)
+
+    probs = torch.softmax(out["logits"], dim=1).cpu().numpy()[0]
+    depth_cm = float(out["depth_cm"].cpu().numpy()[0])
+    depth_cm = max(0.0, min(depth_cm, 200.0))
+
+    pred_class = int(probs.argmax())
+    confidence = float(probs[pred_class])
+    flood_prob = float(probs[1]) if len(probs) > 1 else float(probs[pred_class])
+    flood_detected = pred_class == 1 or flood_prob > 0.5
+
+    if depth_cm < 20:
+        classification = "dangkal"
+    elif depth_cm < 40:
+        classification = "sedang"
+    else:
+        classification = "dalam"
+
+    return {
+        "flood_detected": flood_detected,
+        "classification": classification,
+        "flood_probability": round(flood_prob, 4),
+        "confidence": round(confidence, 4),
+        "depth_estimate_cm": round(depth_cm, 1),
+    }
 
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "version": "2.0.0"}
 
 
 @app.post("/api/classify-image", response_model=CVResult)
 async def classify_image(file: UploadFile = File(...)):
+    frame_bytes = await file.read()
+    result = _run_cv_inference(frame_bytes)
+
     return CVResult(
-        flood_detected=False,
-        severity="normal",
-        depth_range="<20cm",
-        depth_estimate_cm=0.0,
-        confidence=0.5,
-        bounding_boxes=[],
+        flood_detected=result["flood_detected"],
+        classification=result["classification"],
+        depth_estimate_cm=result["depth_estimate_cm"],
+        confidence=result["confidence"],
     )
 
 
-@app.post("/api/predict-flood", response_model=FloodPrediction)
-async def predict_flood(req: PredictRequest):
-    clf, reg, scaler = get_models()
-    df = get_data()
-    feature_cols = get_feature_cols()
+@app.post("/api/scan-cctv", response_model=CCTVScanResponse)
+async def scan_cctv(req: CCTVScanRequest):
+    from detection.cctv_client import CCTVClient
+    from detection.verifier import FalsePositiveFilter
+    from routing.area_mapping import get_area_name
+    from detection.classifier import classify_flood
+    import asyncio
 
-    if req.area_id:
-        area_df = df[df["area_id"] == req.area_id].sort_values("date").tail(1)
-    elif req.lat and req.lng:
-        df["dist"] = np.sqrt((df["lat"] - req.lat) ** 2 + (df["lng"] - req.lng) ** 2)
-        area_df = df.nsmallest(1, "dist")
-    else:
-        area_df = df.sort_values("date").groupby("area_id").tail(1)
+    client = CCTVClient(
+        categories=req.categories or ["rawan_genangan", "sungai", "pompa_air"],
+    )
+    fp_filter = FalsePositiveFilter()
 
-    row = area_df.iloc[0]
-    X = row[feature_cols].values.reshape(1, -1)
-    X_scaled = scaler.transform(X)
+    cameras = await client.get_cameras(force_refresh=True)
 
-    proba = clf.predict_proba(X_scaled)[0]
-    flood_prob = float(sum(proba[1:]))
-    depth_cm = float(reg.predict(X_scaled)[0])
-    depth_cm = max(0, min(depth_cm, 200))
+    if req.camera_ids:
+        cameras = [c for c in cameras if c.cctv_id in req.camera_ids]
 
-    if flood_prob > 0.8:
-        risk = "tidak_dapat_dilalui"
-    elif flood_prob > 0.5:
-        risk = "tergenang"
-    elif flood_prob > 0.2:
-        risk = "waspada"
-    else:
-        risk = "normal"
+    timestamp = time.time()
+    total = len(cameras)
+    scanned = 0
+    successful = 0
+    failed = 0
+    detections = []
 
-    depth_buckets = [(0, 20, "<20cm"), (20, 40, "20-40cm"), (40, 70, "40-70cm"), (70, 200, ">70cm")]
-    depth_range = ">70cm"
-    for low, high, label in depth_buckets:
-        if low <= depth_cm < high:
-            depth_range = label
-            break
+    semaphore = asyncio.Semaphore(5)
 
-    return FloodPrediction(
-        area_id=row["area_id"],
-        lat=float(row["lat"]),
-        lng=float(row["lng"]),
-        flood_probability=round(flood_prob, 4),
-        predicted_depth_range=depth_range,
-        time_window=req.time_window,
-        confidence=round(float(max(proba)), 4),
-        risk_level=risk,
+    async def _scan_one(cam):
+        nonlocal scanned, successful, failed
+
+        async with semaphore:
+            scanned += 1
+            frame = await client.extract_frame(cam)
+            if not frame:
+                failed += 1
+                return None
+            successful += 1
+
+            try:
+                cv_result = _run_cv_inference(frame)
+            except Exception as e:
+                logger.error(f"CV inference failed for {cam.name}: {e}")
+                return None
+
+            nparr = np.frombuffer(frame, np.uint8)
+            frame_img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+            fp_result = fp_filter.filter(
+                frame=frame_img,
+                cv_result=cv_result,
+                camera_id=f"cctv_{cam.cctv_id}_{cam.link_id}",
+            )
+
+            area_name = get_area_name(cam.lat, cam.lng)
+            is_flood = (
+                fp_result.is_genuine_flood
+                and cv_result["confidence"] >= 0.5
+                and cv_result["depth_estimate_cm"] >= 10
+            )
+
+            if is_flood:
+                cls_result = classify_flood(cv_result["depth_estimate_cm"], area_name)
+                classification = cls_result.classification
+                status = cls_result.status
+                status_label = cls_result.status_label
+                color = cls_result.color
+                notification = cls_result.notification
+            else:
+                classification = "normal"
+                status = "safe"
+                status_label = "Aman"
+                color = "#10B981"
+                notification = ""
+
+            return CCTVFrameResult(
+                camera_id=cam.cctv_id,
+                camera_name=cam.name,
+                lat=cam.lat,
+                lng=cam.lng,
+                stream_url=cam.stream_url,
+                flood_detected=is_flood,
+                classification=classification,
+                depth_estimate_cm=cv_result["depth_estimate_cm"],
+                confidence=max(0, min(1, cv_result["confidence"] + fp_result.confidence_modifier)),
+                area_name=area_name,
+                notification=notification,
+                status=status,
+                status_label=status_label,
+                color=color,
+                false_positive_filtered=not fp_result.is_genuine_flood and cv_result["flood_detected"],
+                filter_reasons=fp_result.reasons,
+                frame_timestamp=time.time(),
+            )
+
+    tasks = [_scan_one(cam) for cam in cameras]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    for r in results:
+        if isinstance(r, CCTVFrameResult):
+            detections.append(r)
+
+    return CCTVScanResponse(
+        timestamp=timestamp,
+        total_cameras=total,
+        scanned_cameras=scanned,
+        successful_frames=successful,
+        failed_frames=failed,
+        detections=detections,
     )
 
 
-@app.post("/api/verify-report", response_model=VerificationResult)
-async def verify_report(report: ReportInput):
-    flags = []
-    confidence = 0.5
+@app.post("/api/calculate-route", response_model=RouteCalculateResponse)
+async def calculate_route(req: RouteCalculateRequest):
+    from routing.route_engine import calculate_safe_routes
+    from routing.evacuation_finder import find_nearest_evacuation
 
-    if report.lat and report.lng:
-        _, _, scaler = get_models()
-        df = get_data()
-        feature_cols = get_feature_cols()
+    flood_zones = []
 
-        df["dist"] = np.sqrt((df["lat"] - report.lat) ** 2 + (df["lng"] - report.lng) ** 2)
-        nearby = df[df["dist"] < 0.02]
-        if len(nearby) > 0:
-            avg_precip = nearby["total_precipitation"].mean()
-            if avg_precip > 10:
-                confidence += 0.25
-            elif avg_precip < 0.5:
-                confidence -= 0.1
-                flags.append("no_rain_nearby")
+    result = calculate_safe_routes(
+        origin_lat=req.origin.lat,
+        origin_lng=req.origin.lng,
+        dest_lat=req.destination.lat,
+        dest_lng=req.destination.lng,
+        flood_zones=flood_zones,
+        vehicle_max_depth_cm=req.vehicle_max_depth_cm or 30.0,
+    )
 
-    if confidence > 0.7:
-        status = "verified"
-    elif confidence > 0.4:
-        status = "unverified"
-    else:
-        status = "flagged"
+    evacuation = find_nearest_evacuation(req.origin.lat, req.origin.lng)
 
-    return VerificationResult(
-        report_id=report.report_id,
-        verification_status=status,
-        confidence_score=round(min(confidence, 1.0), 4),
-        flags=flags,
-        estimated_depth=None,
+    options = []
+    for opt in result["options"]:
+        road_labels = [
+            RoadLabel(
+                segment=rl["segment"],
+                status=rl["status"],
+                color=rl["color"],
+                depth_cm=rl.get("depth_cm", 0),
+            )
+            for rl in opt.get("road_labels", [])
+        ]
+        options.append(RouteOption(
+            id=opt["id"],
+            type=opt["type"],
+            title=opt["title"],
+            badge=opt["badge"],
+            duration=opt["duration"],
+            distance=opt["distance"],
+            flood_avoided=opt["flood_avoided"],
+            risk_level=opt["risk_level"],
+            color=opt["color"],
+            description=opt["description"],
+            path=opt["path"],
+            road_labels=road_labels,
+        ))
+
+    evac_result = None
+    if evacuation:
+        evac_result = EvacuationResult(**evacuation)
+
+    return RouteCalculateResponse(
+        origin=req.origin.name or "Lokasi Saat Ini",
+        destination=req.destination.name or "Tujuan",
+        flood_zones_active=result["flood_zones_active"],
+        options=options,
+        nearest_evacuation=evac_result,
     )
 
 
 @app.get("/api/flood-zones", response_model=FloodZoneResponse)
 async def get_flood_zones():
-    clf, reg, scaler = get_models()
-    df = get_data()
-    feature_cols = get_feature_cols()
+    from routing.area_mapping import get_area_name
 
     zones = []
-    for area_id in df["area_id"].unique():
-        area_df = df[df["area_id"] == area_id].sort_values("date").tail(1)
-        row = area_df.iloc[0]
-        X = row[feature_cols].values.reshape(1, -1)
-        X_scaled = scaler.transform(X)
-
-        proba = clf.predict_proba(X_scaled)[0]
-        flood_prob = float(sum(proba[1:]))
-        depth_cm = float(reg.predict(X_scaled)[0])
-        depth_cm = max(0, min(depth_cm, 200))
-
-        if flood_prob > 0.8:
-            risk = "tidak_dapat_dilalui"
-        elif flood_prob > 0.5:
-            risk = "tergenang"
-        elif flood_prob > 0.2:
-            risk = "waspada"
-        else:
-            risk = "normal"
-
-        zones.append(FloodZone(
-            id=area_id,
-            name=row.get("area_name", area_id),
-            lat=float(row["lat"]),
-            lng=float(row["lng"]),
-            depth=round(depth_cm, 1),
-            status=risk,
-            confidence=round(float(max(proba)), 4),
-            last_updated=str(row["date"]),
-            source="predictive_model",
-        ))
 
     return FloodZoneResponse(zones=zones)
 
 
-@app.get("/api/predictions")
-async def get_predictions():
-    clf, reg, scaler = get_models()
-    df = get_data()
-    feature_cols = get_feature_cols()
-
-    predictions = []
-    for area_id in df["area_id"].unique():
-        area_df = df[df["area_id"] == area_id].sort_values("date").tail(1)
-        row = area_df.iloc[0]
-        X = row[feature_cols].values.reshape(1, -1)
-        X_scaled = scaler.transform(X)
-
-        proba = clf.predict_proba(X_scaled)[0]
-        flood_prob = float(sum(proba[1:]))
-
-        if flood_prob > 0.2:
-            depth_cm = float(reg.predict(X_scaled)[0])
-            predictions.append({
-                "area_id": area_id,
-                "lat": float(row["lat"]),
-                "lng": float(row["lng"]),
-                "flood_probability": round(flood_prob, 4),
-                "depth_cm": round(max(0, min(depth_cm, 200)), 1),
-                "date": str(row["date"]),
-            })
-
-    return {"predictions": predictions}
+@app.get("/api/evacuation-points")
+async def get_evacuation_points():
+    from routing.evacuation_finder import get_all_evacuation_points
+    return get_all_evacuation_points()

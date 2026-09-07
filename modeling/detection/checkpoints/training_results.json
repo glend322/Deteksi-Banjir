@@ -1,0 +1,19 @@
+{
+  "best_val_f1": 0.9769230769230769,
+  "best_cause_acc": 0.9513513513513514,
+  "test_acc": 0.9679144385026738,
+  "test_f1": 0.9770992366412213,
+  "test_precision": 1.0,
+  "test_recall": 0.9552238805970149,
+  "test_cause_acc": 0.9090909090909091,
+  "test_river_acc": 0.9411764705882353,
+  "test_trash_acc": 0.9572192513368984,
+  "test_depth_acc": 0.9732620320855615,
+  "test_dangkal_acc": 1.0,
+  "test_sedang_acc": 0.9626865671641791,
+  "test_dalam_acc": 0.0,
+  "test_tp": 128,
+  "test_fp": 0,
+  "test_fn": 6,
+  "test_tn": 53
+}

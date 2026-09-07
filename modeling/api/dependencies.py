@@ -1,42 +1,42 @@
 """
-Dependencies for FastAPI — model loading and shared state.
+FastAPI Dependencies — Model Loading & Shared State
 """
-import sys
+import logging
 from pathlib import Path
 
-# Add predictive_model to path
-MODEL_DIR = Path(__file__).parent.parent / "predictive_model"
-sys.path.insert(0, str(MODEL_DIR))
+import torch
 
-import pickle
-from dataset import load_data, add_temporal_features, FEATURE_COLS
+logger = logging.getLogger(__name__)
 
-_clf = None
-_reg = None
-_scaler = None
-_df = None
+ROOT_DIR = Path(__file__).parent.parent
+CHECKPOINT_DIR = ROOT_DIR / "checkpoints"
+
+_cv_model = None
+_cv_device = None
 
 
-def get_models():
-    global _clf, _reg, _scaler
-    if _clf is None:
-        ckpt = MODEL_DIR / "checkpoints"
-        with open(ckpt / "classifier.pkl", "rb") as f:
-            _clf = pickle.load(f)
-        with open(ckpt / "regressor.pkl", "rb") as f:
-            _reg = pickle.load(f)
-        with open(ckpt / "scaler.pkl", "rb") as f:
-            _scaler = pickle.load(f)
-    return _clf, _reg, _scaler
+def get_cv_model():
+    global _cv_model, _cv_device
 
+    if _cv_model is not None:
+        return _cv_model, _cv_device
 
-def get_data():
-    global _df
-    if _df is None:
-        _df = load_data()
-        _df = add_temporal_features(_df)
-    return _df
+    from detection.cv_model import FloodClassifier
 
+    _cv_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    ckpt_path = CHECKPOINT_DIR / "best.pt"
 
-def get_feature_cols():
-    return FEATURE_COLS + ["day_of_week", "month", "day_of_year", "is_rainy_season"]
+    if ckpt_path.exists():
+        ckpt = torch.load(ckpt_path, map_location=_cv_device, weights_only=False)
+        backbone = ckpt.get("backbone", "resnet50")
+        _cv_model = FloodClassifier(num_classes=2, pretrained=False, backbone=backbone)
+        _cv_model.load_state_dict(ckpt["model_state_dict"])
+        logger.info(f"CV model loaded from {ckpt_path}")
+    else:
+        logger.warning("No checkpoint found, using pretrained model")
+        _cv_model = FloodClassifier(num_classes=2, pretrained=True, backbone="mobilenet_v3_small")
+
+    _cv_model.to(_cv_device)
+    _cv_model.eval()
+
+    return _cv_model, _cv_device

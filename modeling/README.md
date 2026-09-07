@@ -1,38 +1,107 @@
-# Modeling
+# SafeRoute Modeling
 
-AI/ML backend for SafeRoute flood detection platform.
+AI/ML backbone untuk SafeRoute — Flood Detection & Safe Route Recommendation.
 
-## Setup
+## 3 Core Modules
+
+1. **`detection/`** — CV Flood Detection Pipeline (CCTV → CV → Verify → Classify)
+2. **`routing/`** — Safe Route Engine (A* routing + evakuasi terdekat)
+3. **`api/`** — FastAPI Endpoints
+
+## Quick Start
 
 ```bash
 cd modeling
-python -m venv venv
-venv\Scripts\activate        # Windows
 pip install -r requirements.txt
-cp .env.example .env         # fill in API keys
+cp .env.example .env
 ```
 
-## Structure
-
-| Module | Purpose |
-|---|---|
-| `cv_classifier/` | Flood detection from images + depth estimation |
-| `predictive_model/` | Predict flood risk 1-3 hours ahead |
-| `report_verifier/` | Validate crowd-sourced citizen reports |
-| `scraping/` | Collect data from BMKG, OSM, Kaggle, etc. |
-| `api/` | FastAPI REST endpoints wrapping all models |
-| `data/` | Datasets (raw, processed, sample) |
-| `notebooks/` | EDA and training notebooks |
-
-## Run API
+### Run Single CCTV Scan
 
 ```bash
-cd modeling/api
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+python -m detection.detector --once
 ```
 
-## Key Rules
+### Run Continuous Monitoring
 
-- All code stays in `modeling/` — never edit frontend files
-- Models output format compatible with `js/data.js` structure
-- API keys via `.env`, never hardcoded
+```bash
+python -m detection.worker --interval 60
+```
+
+### Start API Server
+
+```bash
+uvicorn api.main:app --host 0.0.0.0 --port 8001
+```
+
+## Output Format
+
+```
+Daerah Semarang Utara banjir tingkat sedang. Penyebab genangan air hujan.
+```
+
+## Classification
+
+| Depth | Kategori | Warna |
+|---|---|---|
+| < 20cm | dangkal | #F59E0B |
+| 20-40cm | sedang | #F97316 |
+| > 40cm | dalam | #EF4444 |
+
+## API Endpoints
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/classify-image` | POST | Classify a single image |
+| `/api/scan-cctv` | POST | Scan all CCTV cameras |
+| `/api/calculate-route` | POST | Calculate safe routes |
+| `/api/flood-zones` | GET | Get active flood zones |
+| `/api/evacuation-points` | GET | Get evacuation points |
+| `/health` | GET | Health check |
+
+## File Structure
+
+```
+modeling/
+├── MODELING_PRD.md              # Product requirements
+├── README.md                    # This file
+├── requirements.txt
+├── .env.example
+├── .gitignore
+│
+├── detection/                   # CV Flood Detection
+│   ├── __init__.py
+│   ├── cctv_client.py           # CCTV scraping + HLS frame extraction
+│   ├── cv_model.py              # CNN flood detection architecture
+│   ├── verifier.py              # False positive filter
+│   ├── classifier.py            # dangkal/sedang/dalam classification
+│   ├── detector.py              # Pipeline orchestrator
+│   ├── train.py                 # Model training script
+│   ├── worker.py                # Background monitoring worker
+│   ├── generate_checkpoint.py   # Checkpoint generator
+│   └── prepare_training_data.py # Data preparation
+│
+├── routing/                     # Safe Route Engine
+│   ├── __init__.py
+│   ├── area_mapping.py          # Reverse geocode → nama daerah
+│   ├── route_engine.py          # A* routing with flood penalty
+│   └── evacuation_finder.py     # Nearest evacuation point
+│
+├── api/                         # FastAPI Endpoints
+│   ├── __init__.py
+│   ├── main.py
+│   ├── schemas.py
+│   └── dependencies.py
+│
+├── data/
+│   ├── README.md
+│   ├── camera_baselines.json    # Baseline water levels per camera
+│   ├── raw/                     # OSM, Kaggle, BMKG data
+│   ├── processed/               # Roads, waterways, drainage graphs
+│   └── training/                # Flood + nonflood images
+│
+├── checkpoints/                 # Model weights
+├── cache/                       # CCTV cache
+├── data_scraper/                # Data preparation tools
+└── notebooks/                   # Exploration notebooks
+```
