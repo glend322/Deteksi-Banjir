@@ -19,6 +19,19 @@ services:
       timeout: 5s
       retries: 5
 
+  worker:
+    build:
+      context: ../modeling
+      dockerfile: Dockerfile
+    container_name: saferoute_worker
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - BACKEND_URL=http://localhost:8000
+      - DATABASE_URL=postgresql://postgres:postgrespassword@db:5432/saferoute_db
+
 volumes:
   postgis_data:
 

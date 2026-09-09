@@ -188,7 +188,7 @@ class FloodDetectionPipeline:
             self._cv_model = FloodClassifier(
                 num_classes=2, num_causes=2, pretrained=False, backbone=backbone
             )
-            self._cv_model.load_state_dict(ckpt["model_state_dict"])
+            self._cv_model.load_state_dict(ckpt["model_state_dict"], strict=False)
             logger.info(f"CV model loaded from {ckpt_path} (backbone={backbone})")
         else:
             logger.warning("No checkpoint found, using pretrained model")

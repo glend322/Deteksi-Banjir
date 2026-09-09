@@ -23,7 +23,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 from torchvision import transforms
 
-from schemas import (
+from api.schemas import (
     CVResult,
     CCTVScanRequest,
     CCTVScanResponse,
@@ -35,8 +35,9 @@ from schemas import (
     FloodZone,
     FloodZoneResponse,
     EvacuationResult,
+    FloodZoneInput,
 )
-from dependencies import get_cv_model
+from api.dependencies import get_cv_model
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +66,7 @@ def _run_cv_inference(frame_bytes: bytes) -> dict:
         out = model(tensor)
 
     probs = torch.softmax(out["logits"], dim=1).cpu().numpy()[0]
-    depth_cm = float(out["depth_cm"].cpu().numpy()[0])
+    depth_cm = float(out["depth_value"].cpu().numpy()[0])
     depth_cm = max(0.0, min(depth_cm, 200.0))
 
     pred_class = int(probs.argmax())
@@ -102,7 +103,7 @@ async def classify_image(file: UploadFile = File(...)):
     return CVResult(
         flood_detected=result["flood_detected"],
         classification=result["classification"],
-        depth_estimate_cm=result["depth_estimate_cm"],
+        depth_label=result["depth_label"],
         confidence=result["confidence"],
     )
 
@@ -189,7 +190,7 @@ async def scan_cctv(req: CCTVScanRequest):
                 stream_url=cam.stream_url,
                 flood_detected=is_flood,
                 classification=classification,
-                depth_estimate_cm=cv_result["depth_estimate_cm"],
+                depth_label=cv_result["depth_label"],
                 confidence=max(0, min(1, cv_result["confidence"] + fp_result.confidence_modifier)),
                 area_name=area_name,
                 notification=notification,
@@ -223,7 +224,16 @@ async def calculate_route(req: RouteCalculateRequest):
     from routing.route_engine import calculate_safe_routes
     from routing.evacuation_finder import find_nearest_evacuation
 
+    # Convert request flood zones to dict format for route engine
     flood_zones = []
+    for fz in (req.flood_zones or []):
+        flood_zones.append({
+            "lat": fz.lat,
+            "lng": fz.lng,
+            "radius_km": fz.radius_km,
+            "status": fz.status,
+            "depth_cm": fz.depth_cm,
+        })
 
     result = calculate_safe_routes(
         origin_lat=req.origin.lat,
