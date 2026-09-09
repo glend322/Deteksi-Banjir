@@ -35,6 +35,7 @@ from api.schemas import (
     FloodZone,
     FloodZoneResponse,
     EvacuationResult,
+    FloodZoneInput,
 )
 from api.dependencies import get_cv_model
 
@@ -223,7 +224,16 @@ async def calculate_route(req: RouteCalculateRequest):
     from routing.route_engine import calculate_safe_routes
     from routing.evacuation_finder import find_nearest_evacuation
 
+    # Convert request flood zones to dict format for route engine
     flood_zones = []
+    for fz in (req.flood_zones or []):
+        flood_zones.append({
+            "lat": fz.lat,
+            "lng": fz.lng,
+            "radius_km": fz.radius_km,
+            "status": fz.status,
+            "depth_cm": fz.depth_cm,
+        })
 
     result = calculate_safe_routes(
         origin_lat=req.origin.lat,

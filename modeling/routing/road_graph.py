@@ -4,6 +4,10 @@ Road Graph Builder — Converts OSM road data into a NetworkX graph for A* routi
 Loads data/processed/roads_graph.json and builds a directed graph where:
 - Nodes = unique coordinate endpoints (snapped to grid for connectivity)
 - Edges = road segments with distance, name, highway type, and full coords
+
+Uses two-level snapping:
+1. Coarse snap (0.0005 deg ≈ 55m) for endpoint merging across segments
+2. Fine snap (0.0001 deg ≈ 11m) for nearest-node lookups
 """
 import json
 import math
@@ -19,9 +23,11 @@ logger = logging.getLogger(__name__)
 DATA_DIR = Path(__file__).parent.parent / "data" / "processed"
 ROADS_FILE = DATA_DIR / "roads_graph.json"
 
-# Snap grid: coordinates rounded to this precision for node merging
-# ~5 decimal places ≈ 1.1m precision
-SNAP_PRECISION = 5
+# Coarse snap: for merging endpoints across road segments (~550m tolerance)
+COARSE_PRECISION = 2  # 0.005 degrees ≈ 550m
+
+# Fine snap: for nearest-node lookups (~11m tolerance)
+FINE_PRECISION = 5  # 0.0001 degrees ≈ 11m
 
 # Highway type priority (higher = more important for routing)
 HIGHWAY_PRIORITY = {
@@ -53,9 +59,9 @@ def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return R * 2 * math.asin(math.sqrt(a))
 
 
-def _snap_key(lat: float, lng: float) -> tuple:
+def _snap_key(lat: float, lng: float, precision: int = COARSE_PRECISION) -> tuple:
     """Snap coordinates to grid for node deduplication."""
-    return (round(lat, SNAP_PRECISION), round(lng, SNAP_PRECISION))
+    return (round(lat, precision), round(lng, precision))
 
 
 @dataclass
@@ -92,7 +98,7 @@ class RoadGraph:
         return cls._instance
 
     def _build(self):
-        """Build the graph from JSON data."""
+        """Build the graph from JSON data with aggressive connectivity."""
         if not ROADS_FILE.exists():
             logger.error(f"Roads file not found: {ROADS_FILE}")
             return
@@ -102,6 +108,29 @@ class RoadGraph:
 
         logger.info(f"Building road graph from {len(roads)} segments...")
 
+        # Pass 1: Collect all endpoints and snap to coarse grid
+        node_registry: dict[tuple, list[float]] = {}
+
+        for road in roads:
+            coords = road["coords"]
+            if len(coords) < 2:
+                continue
+
+            for coord in [coords[0], coords[-1]]:
+                coarse_key = _snap_key(coord[0], coord[1])
+                if coarse_key not in node_registry:
+                    node_registry[coarse_key] = [coord[0], coord[1]]
+
+        # Create fine-snap index for nearest-node lookups
+        self._node_positions: dict[tuple, tuple] = {}
+        for coarse_key, pos in node_registry.items():
+            fine_key = _snap_key(pos[0], pos[1], FINE_PRECISION)
+            self._node_positions[fine_key] = coarse_key
+
+        logger.info(f"Node registry: {len(node_registry)} unique nodes")
+
+        # Pass 2: Build edges from road segments
+        edges_added = 0
         for road in roads:
             coords = road["coords"]
             if len(coords) < 2:
@@ -113,7 +142,11 @@ class RoadGraph:
             if start_node == end_node:
                 continue
 
-            # Calculate total distance along the segment
+            if start_node not in node_registry:
+                node_registry[start_node] = [coords[0][0], coords[0][1]]
+            if end_node not in node_registry:
+                node_registry[end_node] = [coords[-1][0], coords[-1][1]]
+
             total_dist = 0.0
             for i in range(len(coords) - 1):
                 total_dist += _haversine(
@@ -131,11 +164,11 @@ class RoadGraph:
                 end_node=end_node,
             )
 
-            # Add nodes
-            self.graph.add_node(start_node, lat=coords[0][0], lng=coords[0][1])
-            self.graph.add_node(end_node, lat=coords[-1][0], lng=coords[-1][1])
+            start_pos = node_registry[start_node]
+            end_pos = node_registry[end_node]
+            self.graph.add_node(start_node, lat=start_pos[0], lng=start_pos[1])
+            self.graph.add_node(end_node, lat=end_pos[0], lng=end_pos[1])
 
-            # Add edge (both directions for undirected routing)
             self.edges_data[(start_node, end_node)] = edge
             self.edges_data[(end_node, start_node)] = RoadEdge(
                 road_id=road["id"],
@@ -151,7 +184,6 @@ class RoadGraph:
             self.graph.add_edge(
                 start_node, end_node,
                 weight=total_dist,
-                reverse_weight=total_dist,
                 road_id=road["id"],
                 name=road.get("name", "Unnamed"),
                 highway=road.get("highway", "residential"),
@@ -160,17 +192,22 @@ class RoadGraph:
             self.graph.add_edge(
                 end_node, start_node,
                 weight=total_dist,
-                reverse_weight=total_dist,
                 road_id=road["id"],
                 name=road.get("name", "Unnamed"),
                 highway=road.get("highway", "residential"),
                 priority=priority,
             )
+            edges_added += 1
 
+        self._node_registry = node_registry
         self._loaded = True
+
+        num_components = nx.number_weakly_connected_components(self.graph)
+        largest_cc = max(nx.weakly_connected_components(self.graph), key=len)
         logger.info(
             f"Road graph built: {self.graph.number_of_nodes()} nodes, "
-            f"{self.graph.number_of_edges()} edges"
+            f"{edges_added} road edges, "
+            f"{num_components} components, largest: {len(largest_cc)} nodes"
         )
 
     def find_nearest_node(self, lat: float, lng: float) -> Optional[tuple]:
@@ -178,9 +215,15 @@ class RoadGraph:
         if not self._loaded:
             return None
 
-        target = _snap_key(lat, lng)
-        if target in self.graph:
-            return target
+        # Try fine-snap index first
+        fine_key = _snap_key(lat, lng, FINE_PRECISION)
+        if fine_key in self._node_positions:
+            return self._node_positions[fine_key]
+
+        # Try coarse-snap directly
+        coarse_key = _snap_key(lat, lng)
+        if coarse_key in self.graph:
+            return coarse_key
 
         # Brute-force search nearest node (acceptable for ~9K nodes)
         best_dist = float("inf")

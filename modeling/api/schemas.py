@@ -74,17 +74,30 @@ class Coordinate(BaseModel):
     name: Optional[str] = None
 
 
+class FloodZoneInput(BaseModel):
+    """Flood zone for route calculation."""
+    lat: float = Field(..., description="Latitude of flood zone center")
+    lng: float = Field(..., description="Longitude of flood zone center")
+    radius_km: float = Field(1.0, description="Radius of flood zone in km")
+    status: str = Field("flooded", description="Flood status: watch/flooded/impassable")
+    depth_cm: float = Field(0.0, description="Water depth in cm")
+
+
 class RouteCalculateRequest(BaseModel):
     origin: Coordinate
     destination: Coordinate
     vehicle_max_depth_cm: Optional[float] = 30.0
+    flood_zones: Optional[List[FloodZoneInput]] = Field(
+        default_factory=list,
+        description="Active flood zones to avoid"
+    )
 
 
 class RoadLabel(BaseModel):
     segment: str
     status: str
     color: str
-    depth_label: str = "dangkal"
+    depth_cm: float = 0.0
 
 
 class RouteOption(BaseModel):
