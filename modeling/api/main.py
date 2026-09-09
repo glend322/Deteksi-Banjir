@@ -23,7 +23,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 from torchvision import transforms
 
-from schemas import (
+from api.schemas import (
     CVResult,
     CCTVScanRequest,
     CCTVScanResponse,
@@ -36,7 +36,7 @@ from schemas import (
     FloodZoneResponse,
     EvacuationResult,
 )
-from dependencies import get_cv_model
+from api.dependencies import get_cv_model
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ def _run_cv_inference(frame_bytes: bytes) -> dict:
         out = model(tensor)
 
     probs = torch.softmax(out["logits"], dim=1).cpu().numpy()[0]
-    depth_cm = float(out["depth_cm"].cpu().numpy()[0])
+    depth_cm = float(out["depth_value"].cpu().numpy()[0])
     depth_cm = max(0.0, min(depth_cm, 200.0))
 
     pred_class = int(probs.argmax())
@@ -102,7 +102,7 @@ async def classify_image(file: UploadFile = File(...)):
     return CVResult(
         flood_detected=result["flood_detected"],
         classification=result["classification"],
-        depth_estimate_cm=result["depth_estimate_cm"],
+        depth_label=result["depth_label"],
         confidence=result["confidence"],
     )
 
@@ -189,7 +189,7 @@ async def scan_cctv(req: CCTVScanRequest):
                 stream_url=cam.stream_url,
                 flood_detected=is_flood,
                 classification=classification,
-                depth_estimate_cm=cv_result["depth_estimate_cm"],
+                depth_label=cv_result["depth_label"],
                 confidence=max(0, min(1, cv_result["confidence"] + fp_result.confidence_modifier)),
                 area_name=area_name,
                 notification=notification,

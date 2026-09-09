@@ -17,6 +17,8 @@ Output: "Daerah {nama_daerah} banjir tingkat {classification}. Penyebab {cause}.
 import logging
 from dataclasses import dataclass
 
+from detection.cv_model import DANGKAL_MAX_CM, SEDANG_MAX_CM
+
 logger = logging.getLogger(__name__)
 
 DEPTH_CLASSIFICATION = {

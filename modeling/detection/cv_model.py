@@ -1,9 +1,10 @@
 """
 CV Flood Detection Model — Multi-Head CNN Architecture
 
-Three-head CNN backbone:
+Four-head CNN backbone:
   - Classification head: flood / no_flood
-  - Regression head: water depth estimation (cm)
+  - Depth classification head: dangkal / sedang / dalam (3 classes)
+  - Depth regression head: continuous depth estimation (cm)
   - Cause detection head: river / trash (multi-label)
 
 Supports: ResNet50, EfficientNet-B0, MobileNetV3-Small
@@ -15,7 +16,12 @@ import torchvision.models as models
 
 CLASS_NAMES = ["no_flood", "flood"]
 CAUSE_NAMES = ["river", "trash"]
-DEPTH_BUCKETS = [(0, 20), (20, 40), (40, 200)]
+
+DANGKAL_MAX_CM = 20.0
+SEDANG_MAX_CM = 40.0
+DEPTH_MAX_CM = 200.0
+
+DEPTH_BUCKETS = [(0, DANGKAL_MAX_CM), (DANGKAL_MAX_CM, SEDANG_MAX_CM), (SEDANG_MAX_CM, DEPTH_MAX_CM)]
 DEPTH_BUCKET_LABELS = ["dangkal", "sedang", "dalam"]
 DEPTH_CLASSES = {"dangkal": 0, "sedang": 1, "dalam": 2}
 DEPTH_BUCKET_COLORS = ["#F59E0B", "#F97316", "#EF4444"]
@@ -28,7 +34,7 @@ BACKBONE_REGISTRY = {
 
 
 class FloodClassifier(nn.Module):
-    """CNN backbone with three heads: flood cls, depth cls (3 classes), cause detection."""
+    """CNN backbone with four heads: flood cls, depth cls, depth reg, cause detection."""
 
     def __init__(self, num_classes: int = 2, num_causes: int = 2, num_depth_classes: int = 3, pretrained: bool = True, backbone: str = "resnet50"):
         super().__init__()
@@ -71,23 +77,34 @@ class FloodClassifier(nn.Module):
             nn.Linear(128, num_causes),
         )
 
+        self.depth_regressor = nn.Sequential(
+            nn.Dropout(0.3),
+            nn.Linear(feature_dim, 128),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(128, 1),
+            nn.ReLU(),
+        )
+
     def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
         features = self.backbone(x)
         logits = self.classifier(features)
         depth_logits = self.depth_classifier(features)
         cause_logits = self.cause_classifier(features)
+        depth_value = self.depth_regressor(features)
         return {
             "logits": logits,
             "depth_logits": depth_logits,
+            "depth_value": depth_value,
             "cause_logits": cause_logits,
         }
 
 
 def depth_to_classification(depth_cm: float) -> str:
     """Map depth in cm to dangkal/sedang/dalam."""
-    if depth_cm < 20:
+    if depth_cm < DANGKAL_MAX_CM:
         return "dangkal"
-    elif depth_cm < 40:
+    elif depth_cm < SEDANG_MAX_CM:
         return "sedang"
     else:
         return "dalam"
@@ -95,9 +112,9 @@ def depth_to_classification(depth_cm: float) -> str:
 
 def depth_cm_to_class(depth_cm: float) -> int:
     """Map depth in cm to class index (0=dangkal, 1=sedang, 2=dalam)."""
-    if depth_cm < 20:
+    if depth_cm < DANGKAL_MAX_CM:
         return 0
-    elif depth_cm < 40:
+    elif depth_cm < SEDANG_MAX_CM:
         return 1
     else:
         return 2

@@ -77,7 +77,7 @@ class Coordinate(BaseModel):
 class RouteCalculateRequest(BaseModel):
     origin: Coordinate
     destination: Coordinate
-    vehicle_max_depth: Optional[str] = "sedang"
+    vehicle_max_depth_cm: Optional[float] = 30.0
 
 
 class RoadLabel(BaseModel):

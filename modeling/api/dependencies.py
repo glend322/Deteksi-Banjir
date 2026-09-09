@@ -30,7 +30,7 @@ def get_cv_model():
         ckpt = torch.load(ckpt_path, map_location=_cv_device, weights_only=False)
         backbone = ckpt.get("backbone", "resnet50")
         _cv_model = FloodClassifier(num_classes=2, pretrained=False, backbone=backbone)
-        _cv_model.load_state_dict(ckpt["model_state_dict"])
+        _cv_model.load_state_dict(ckpt["model_state_dict"], strict=False)
         logger.info(f"CV model loaded from {ckpt_path}")
     else:
         logger.warning("No checkpoint found, using pretrained model")

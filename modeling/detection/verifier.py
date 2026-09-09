@@ -27,7 +27,7 @@ class FalsePositiveFilter:
     def __init__(
         self,
         min_confidence: float = 0.95,
-        min_depth_cm: float = 25.0,
+        min_depth_cm: float = 5.0,
         min_water_ratio: float = 0.20,
         history_size: int = 10,
     ):
