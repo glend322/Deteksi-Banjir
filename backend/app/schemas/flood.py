@@ -20,6 +20,22 @@ class FloodPointBase(BaseModel):
 class FloodPointCreate(FloodPointBase):
     slug: Optional[str] = None
 
+class FloodPointUpdate(BaseModel):
+    """Schema untuk update partial flood point (semua field opsional)."""
+    name: Optional[str] = None
+    area: Optional[str] = None
+    status: Optional[str] = None
+    status_label: Optional[str] = None
+    depth_cm: Optional[int] = None
+    confidence: Optional[int] = None
+    source: Optional[str] = None
+    image_url: Optional[str] = None
+    recommendation: Optional[str] = None
+    cause: Optional[str] = None
+    vehicles_allowed: Optional[List[str]] = None
+    lat: Optional[float] = Field(None, ge=-90, le=90)
+    lng: Optional[float] = Field(None, ge=-180, le=180)
+
 class FloodPointResponse(FloodPointBase):
     id: int
     slug: Optional[str] = None
@@ -28,6 +44,25 @@ class FloodPointResponse(FloodPointBase):
 
     class Config:
         from_attributes = True
+
+class FloodZoneCreate(BaseModel):
+    slug: Optional[str] = None
+    name: str
+    status: str = "flooded"  # impassable, flooded, watch
+    fill_color: Optional[str] = "#3B82F6"
+    fill_opacity: Optional[float] = 0.45
+    border_color: Optional[str] = "#EF4444"
+    border_weight: Optional[int] = 3
+    coordinates: List[List[float]] = Field(..., min_length=3, description="List of [lat, lng] pairs forming a polygon")
+
+class FloodZoneUpdate(BaseModel):
+    name: Optional[str] = None
+    status: Optional[str] = None
+    fill_color: Optional[str] = None
+    fill_opacity: Optional[float] = None
+    border_color: Optional[str] = None
+    border_weight: Optional[int] = None
+    coordinates: Optional[List[List[float]]] = None
 
 class FloodZoneResponse(BaseModel):
     id: int

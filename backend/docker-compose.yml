@@ -1,37 +1,115 @@
-version: '3.8'
+# ═══════════════════════════════════════════════════
+# SafeRoute Semarang — Docker Compose
+# Services: db (PostGIS) → backend (FastAPI) → worker (Modeling/CV)
+# Jalankan: docker-compose up -d --build
+# ═══════════════════════════════════════════════════
 
 services:
+
+  # ─── 1. Database: PostgreSQL + PostGIS ───────────
   db:
     image: postgis/postgis:15-3.3-alpine
-    container_name: saferoute_postgis
-    restart: always
+    container_name: saferoute_db
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
-      POSTGRES_DB: saferoute_db
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgrespassword}
+      POSTGRES_DB: ${POSTGRES_DB:-saferoute_db}
     ports:
       - "5432:5432"
     volumes:
       - postgis_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d saferoute_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-saferoute_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - saferoute_net
 
+  # ─── 2. Backend: FastAPI ─────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: saferoute_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Database (override ke container internal)
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgrespassword}@db:5432/${POSTGRES_DB:-saferoute_db}
+      # Secrets & Config
+      SECRET_KEY: ${SECRET_KEY:-saferoute-semarang-super-secret-jwt-key-2026-hackathon}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-internal-saferoute-ai-key-2026}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
+      ALGORITHM: HS256
+      # Routing & Modeling
+      OSRM_BASE_URL: ${OSRM_BASE_URL:-http://router.project-osrm.org}
+      MODELING_API_URL: http://worker:8001
+      # CORS (izinkan frontend)
+      BACKEND_CORS_ORIGINS: '["*"]'
+      PROJECT_NAME: SafeRoute API
+    ports:
+      - "8000:8000"
+    volumes:
+      - backend_uploads:/app/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import httpx; r=httpx.get('http://localhost:8000/health', timeout=3); exit(0 if r.status_code==200 else 1)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    networks:
+      - saferoute_net
+
+  # ─── 3. Worker: Modeling / CV Service ────────────
   worker:
     build:
       context: ../modeling
       dockerfile: Dockerfile
     container_name: saferoute_worker
-    restart: always
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
     environment:
-      - BACKEND_URL=http://localhost:8000
-      - DATABASE_URL=postgresql://postgres:postgrespassword@db:5432/saferoute_db
+      # Backend URL (untuk push hasil deteksi)
+      BACKEND_URL: http://backend:8000
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-internal-saferoute-ai-key-2026}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgrespassword}@db:5432/${POSTGRES_DB:-saferoute_db}
+      # Model & CCTV settings
+      CV_CHECKPOINT: checkpoints/best.pt
+      CCTV_SCAN_INTERVAL: ${CCTV_SCAN_INTERVAL:-60}
+      CCTV_CONFIDENCE_THRESHOLD: ${CCTV_CONFIDENCE_THRESHOLD:-0.5}
+      CCTV_COOLDOWN_MINUTES: ${CCTV_COOLDOWN_MINUTES:-15}
+    ports:
+      - "8001:8001"
+    volumes:
+      - model_checkpoints:/app/checkpoints
+    command: >
+      sh -c "
+        uvicorn api.main:app --host 0.0.0.0 --port 8001 &
+        python -m detection.worker --interval ${CCTV_SCAN_INTERVAL:-60}
+      "
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import httpx; r=httpx.get('http://localhost:8001/health', timeout=3); exit(0 if r.status_code==200 else 1)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - saferoute_net
 
 volumes:
   postgis_data:
+    driver: local
+  backend_uploads:
+    driver: local
+  model_checkpoints:
+    driver: local
 
+networks:
+  saferoute_net:
+    driver: bridge

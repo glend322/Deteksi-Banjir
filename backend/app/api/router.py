@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.endpoints import auth, users, flood, reports, routes, evacuation, weather, ai_bridge
+from app.api.endpoints import auth, users, flood, reports, routes, evacuation, weather, ai_bridge, analytics
 
 api_router = APIRouter()
 
@@ -10,4 +10,5 @@ api_router.include_router(reports.router, prefix="/reports", tags=["Citizen Repo
 api_router.include_router(routes.router, prefix="/routes", tags=["Safe Routing"])
 api_router.include_router(evacuation.router, prefix="/evacuations", tags=["Evacuation Points"])
 api_router.include_router(weather.router, prefix="/weather", tags=["Weather & Alerts"])
+api_router.include_router(analytics.router, prefix="/analytics", tags=["Analytics & Metrics"])
 api_router.include_router(ai_bridge.router, prefix="/internal/ai", tags=["AI Integration Bridge"])

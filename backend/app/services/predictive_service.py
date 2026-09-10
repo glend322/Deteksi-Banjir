@@ -1,7 +1,7 @@
 import httpx
 import logging
 from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, List
 from sqlalchemy.orm import Session
 from app.models.weather import Alert, WeatherForecastCache
 from app.models.flood import FloodPoint
@@ -9,12 +9,43 @@ from app.services.weather_service import map_weather_code
 
 logger = logging.getLogger(__name__)
 
-# Koordinat Spasial Hidrologi Semarang
-HULU_COORDS = (-7.0505, 110.4410)   # Semarang Atas (Banyumanik / Ungaran - Hulu DAS)
-HILIR_COORDS = (-6.9535, 110.4570)  # Semarang Bawah (Genuk / Kaligawe - Hilir Rawan Banjir)
-
 # Kode cuaca BMKG/Open-Meteo dengan intensitas tinggi
 HEAVY_RAIN_CODES = {63, 65, 81, 82, 95, 96, 99}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Konfigurasi Multi-Area DAS Semarang (PRD 5.4 — P2.5)
+# Setiap entry: (nama_das, koordinat_hulu, koordinat_hilir, slug_alert, label_area)
+# ─────────────────────────────────────────────────────────────────────────────
+WATERSHED_ZONES: List[Dict[str, Any]] = [
+    {
+        "name": "DAS Kali Babon (Banyumanik → Kaligawe)",
+        "upstream": (-7.0505, 110.4410),    # Banyumanik / Ungaran
+        "downstream": (-6.9535, 110.4570),  # Kaligawe / Genuk
+        "alert_slug": "alert-predictive-hulu-kaligawe",
+        "downstream_area": "Kec. Genuk, Kaligawe & Semarang Utara",
+        "affected_point_slug": "loc-kaligawe",
+        "lead_time": "2-3 jam",
+    },
+    {
+        "name": "DAS Kali Garang (Ungaran → Tugu/Semarang Barat)",
+        "upstream": (-7.1200, 110.3800),    # Ungaran hulu Kali Garang
+        "downstream": (-6.9700, 110.3600),  # Tugu / Semarang Barat
+        "alert_slug": "alert-predictive-hulu-kali-garang",
+        "downstream_area": "Kec. Tugu, Semarang Barat & Mijen",
+        "affected_point_slug": "loc-tugu",
+        "lead_time": "3-4 jam",
+    },
+    {
+        "name": "DAS Kali Semarang (Gunungpati → Semarang Tengah)",
+        "upstream": (-7.0800, 110.3900),    # Gunungpati
+        "downstream": (-6.9870, 110.4100),  # Semarang Tengah / Bulu
+        "alert_slug": "alert-predictive-hulu-kali-semarang",
+        "downstream_area": "Kec. Semarang Tengah & Semarang Barat",
+        "affected_point_slug": "loc-bulu",
+        "lead_time": "2-3 jam",
+    },
+]
+
 
 async def fetch_spot_weather(lat: float, lng: float) -> Dict[str, Any]:
     """
@@ -53,32 +84,30 @@ async def fetch_spot_weather(lat: float, lng: float) -> Dict[str, Any]:
         "humidity": 85
     }
 
-async def run_predictive_flood_engine(db: Session, force_trigger: bool = False) -> Dict[str, Any]:
-    """
-    PRD 5.4: Prediksi, Bukan Hanya Deteksi
-    Mendeteksi hujan lebat di hulu (Semarang Atas) dan menerbitkan Alert prediktif
-    untuk hilir (Genuk & Kaligawe) sebelum air benar-benar meluap (Lead time ±2-3 jam).
-    """
-    # 1. Ambil data cuaca hulu dan hilir
-    upstream_weather = await fetch_spot_weather(HULU_COORDS[0], HULU_COORDS[1])
-    downstream_weather = await fetch_spot_weather(HILIR_COORDS[0], HILIR_COORDS[1])
 
+async def _process_single_watershed(zone: Dict[str, Any], db: Session, force_trigger: bool = False) -> Dict[str, Any]:
+    """
+    Proses prediksi dini untuk satu zona DAS:
+    - Ambil data cuaca hulu
+    - Jika hujan lebat → terbitkan alert prediktif untuk area hilir
+    - Update status flood point terdampak
+    """
+    upstream_weather = await fetch_spot_weather(zone["upstream"][0], zone["upstream"][1])
     up_code = upstream_weather.get("weather_code", 0)
     up_precip = upstream_weather.get("precipitation", 0.0)
     up_condition = upstream_weather.get("condition", "Cerah")
 
     is_heavy_upstream = (up_code in HEAVY_RAIN_CODES) or (up_precip >= 10.0) or force_trigger
-    alert_slug = "alert-predictive-hulu-kaligawe"
-
+    alert_slug = zone["alert_slug"]
     alert_obj = db.query(Alert).filter(Alert.slug == alert_slug).first()
 
     if is_heavy_upstream:
         urgency = "urgent" if (up_code in {65, 82, 95, 96, 99} or up_precip >= 20.0) else "warning"
-        title_text = "⚠️ Peringatan Dini: Potensi Banjir Kiriman Hulu (Genuk & Kaligawe)"
+        title_text = f"⚠️ Peringatan Dini: Potensi Banjir Kiriman ({zone['name']})"
         subtext = (
-            f"Curah hujan tinggi ({up_condition}, {up_precip:.1f} mm) terdeteksi di wilayah hulu Semarang Atas. "
-            "Berdasarkan pemodelan hidrologi DAS Kali Babon & Kali Tenggang, limpasan air diprediksi "
-            "mencapai area hilir Kaligawe dalam 2–3 jam ke depan. Harap gunakan rute alternatif."
+            f"Curah hujan tinggi ({up_condition}, {up_precip:.1f} mm) terdeteksi di wilayah hulu {zone['name']}. "
+            f"Berdasarkan pemodelan hidrologi, limpasan air diprediksi mencapai area hilir dalam {zone['lead_time']}. "
+            "Harap gunakan rute alternatif."
         )
 
         if not alert_obj:
@@ -86,7 +115,7 @@ async def run_predictive_flood_engine(db: Session, force_trigger: bool = False) 
                 slug=alert_slug,
                 category=urgency,
                 title=title_text,
-                location="Kec. Genuk, Kaligawe & Semarang Utara",
+                location=zone["downstream_area"],
                 subtext=subtext,
                 icon="alert-triangle",
                 color="#EF4444" if urgency == "urgent" else "#F59E0B",
@@ -103,30 +132,31 @@ async def run_predictive_flood_engine(db: Session, force_trigger: bool = False) 
             alert_obj.is_active = True
             alert_obj.color = "#EF4444" if urgency == "urgent" else "#F59E0B"
 
-        # Update proaktif status titik pantau Kaligawe
-        kaligawe_point = db.query(FloodPoint).filter(FloodPoint.slug == "loc-kaligawe").first()
-        if kaligawe_point:
-            if kaligawe_point.depth_cm == 0 or kaligawe_point.status == "safe":
-                kaligawe_point.depth_cm = 35
-                kaligawe_point.status = "watch"
-                kaligawe_point.status_label = "Waspada (Potensi Luapan Hulu)"
-                kaligawe_point.recommendation = "Potensi kenaikan air akibat kiriman dari Semarang Atas dalam 2-3 jam."
+        # Update proaktif status titik pantau hilir terdampak
+        affected_point = db.query(FloodPoint).filter(
+            FloodPoint.slug == zone["affected_point_slug"]
+        ).first()
+        if affected_point and (affected_point.depth_cm == 0 or affected_point.status == "safe"):
+            affected_point.depth_cm = 35
+            affected_point.status = "watch"
+            affected_point.status_label = f"Waspada (Potensi Luapan {zone['name']})"
+            affected_point.recommendation = (
+                f"Potensi kenaikan air akibat kiriman dari hulu {zone['name']} dalam {zone['lead_time']}."
+            )
 
-        db.commit()
-        logger.info(f"🚨 [Predictive Alert] Berhasil menerbitkan peringatan dini luapan hulu: {title_text}")
-
+        logger.info(f"🚨 [Predictive Alert] Alert diterbitkan: {title_text}")
         return {
+            "zone": zone["name"],
             "status": "alert_active",
             "is_heavy_upstream": True,
             "upstream_condition": up_condition,
             "upstream_precipitation_mm": up_precip,
-            "downstream_condition": downstream_weather.get("condition"),
             "alert_category": urgency,
-            "lead_time": "2-3 jam"
+            "lead_time": zone["lead_time"]
         }
 
     else:
-        # Jika cuaca hulu sudah reda dan alert aktif sudah lebih dari 4 jam, nonaktifkan alert
+        # Nonaktifkan alert jika cuaca sudah reda > 4 jam
         if alert_obj and alert_obj.is_active:
             now = datetime.now(timezone.utc)
             alert_time = alert_obj.created_at
@@ -135,14 +165,40 @@ async def run_predictive_flood_engine(db: Session, force_trigger: bool = False) 
                     alert_time = alert_time.replace(tzinfo=timezone.utc)
                 if (now - alert_time).total_seconds() > 4 * 3600:
                     alert_obj.is_active = False
-                    db.commit()
-                    logger.info("ℹ️ [Predictive Alert] Cuaca hulu normal, alert prediktif dideaktivasi.")
+                    logger.info(f"ℹ️ [Predictive Alert] Alert {alert_slug} dideaktivasi (cuaca hulu normal).")
 
         return {
+            "zone": zone["name"],
             "status": "normal",
             "is_heavy_upstream": False,
             "upstream_condition": up_condition,
             "upstream_precipitation_mm": up_precip,
-            "downstream_condition": downstream_weather.get("condition")
         }
 
+
+async def run_predictive_flood_engine(db: Session, force_trigger: bool = False) -> Dict[str, Any]:
+    """
+    PRD 5.4: Prediksi, Bukan Hanya Deteksi — Multi-Area DAS Semarang (P2.5)
+    Menjalankan prediksi hidrologi untuk semua zona DAS yang terdaftar secara berurutan,
+    lalu menerbitkan alert prediktif untuk area hilir yang berpotensi terdampak.
+    """
+    results = []
+    alerts_active = 0
+
+    for zone in WATERSHED_ZONES:
+        try:
+            result = await _process_single_watershed(zone, db, force_trigger=force_trigger)
+            results.append(result)
+            if result.get("status") == "alert_active":
+                alerts_active += 1
+        except Exception as e:
+            logger.error(f"[Predictive Engine] Gagal memproses zona {zone['name']}: {e}")
+            results.append({"zone": zone["name"], "status": "error", "error": str(e)})
+
+    db.commit()
+
+    return {
+        "total_zones_checked": len(WATERSHED_ZONES),
+        "alerts_active": alerts_active,
+        "zones": results
+    }

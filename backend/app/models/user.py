@@ -12,15 +12,19 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=True)
     avatar_url = Column(String(500), nullable=True)
-    
+
     # Spesifikasi Kendaraan (PRD 5.1 & Catatan Tambahan)
     vehicle_type = Column(String(100), default="Mobil (City Car)") # Motor, Mobil Sedan, Mobil SUV, Truk
     vehicle_max_depth_cm = Column(Integer, default=30) # Batas kedalaman air maksimum
-    
+
     # Trust Score & Reputasi Pelapor (PRD 6.4)
     trust_score = Column(Integer, default=50) # Skala 0 - 100 (Default 50 untuk user baru)
     total_reports = Column(Integer, default=0)
     verified_reports = Column(Integer, default=0)
+
+    # Push Notification — Firebase Cloud Messaging (P3.7)
+    fcm_token = Column(String(500), nullable=True)       # Device token FCM
+    notification_enabled = Column(Boolean, default=True) # User bisa opt-out notifikasi
 
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)

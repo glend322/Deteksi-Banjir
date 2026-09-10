@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     # AI / ML Modeling Service
     MODELING_API_URL: str = "http://localhost:8001"
 
+    # Internal API Key untuk endpoint AI Bridge (diisi via .env)
+    INTERNAL_API_KEY: str = "internal-saferoute-ai-key-2026"
+
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["*"]
 
