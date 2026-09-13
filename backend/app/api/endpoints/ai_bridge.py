@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Security
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from geoalchemy2.shape import from_shape
@@ -7,6 +7,7 @@ from typing import Optional
 from datetime import datetime
 
 from app.core.database import get_db
+from app.core.security import verify_internal_api_key
 from app.models.flood import FloodPoint
 from app.models.weather import Alert
 
@@ -37,7 +38,8 @@ class AIPredictionResponse(BaseModel):
 @router.post("/predictions", response_model=AIPredictionResponse, status_code=status.HTTP_201_CREATED, summary="Push Hasil Deteksi AI / CCTV ke Peta")
 def receive_ai_prediction(
     payload: AIPredictionPayload,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    _: str = Depends(verify_internal_api_key)
 ):
     """
     Endpoint Internal untuk Tim AI / ML:

@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from shapely.geometry import Point
-from geoalchemy2.shape import from_shape
+from geoalchemy2.shape import from_shape, to_shape
 
 from app.models.report import FloodReport
 from app.models.flood import FloodPoint
@@ -44,8 +44,10 @@ async def call_cv_classifier(photo_path: str) -> dict:
     except Exception as err:
         logger.debug(f"[AI Pipeline] CV server tidak merespons ({err}), mengaktifkan spatial fallback.")
 
-    # Fallback jika model service standalone offline
-    return {"flood_detected": True, "confidence": 0.88, "depth_estimate_cm": 30}
+    # Fallback konservatif: jangan auto-verify, biarkan spatial analysis jadi penentu
+    # confidence=0.5 → netral, tidak mendorong verifikasi maupun penolakan
+    logger.info("[AI Pipeline] Modeling API offline — menggunakan fallback netral (tidak auto-verify).")
+    return {"flood_detected": False, "confidence": 0.5, "depth_estimate_cm": 0}
 
 async def call_report_verifier(report_id: int, lat: float, lng: float, description: str) -> dict:
     """

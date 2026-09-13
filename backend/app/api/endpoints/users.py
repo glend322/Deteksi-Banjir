@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from geoalchemy2.shape import from_shape
 from shapely.geometry import Point
+from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime, timezone
 
@@ -10,6 +11,7 @@ from app.core.database import get_db
 from app.api.endpoints.auth import get_current_user, build_user_profile
 from app.models.user import User, SavedLocation, TripHistory
 from app.models.flood import FloodPoint, EvacuationPoint
+from app.models.report import FloodReport
 from app.schemas.user import (
     UserProfile,
     UserUpdate,
@@ -293,3 +295,116 @@ def check_user_proximity_hazard(
     )
 
 
+# ─────────────────────────────────────────────
+# GET /users/flood-history  — Riwayat Banjir per Saved Location (PRD 6.6 / P3.6)
+# ─────────────────────────────────────────────
+
+@router.get("/flood-history")
+def get_flood_history_near_saved_locations(
+    radius_km: float = Query(1.0, ge=0.1, le=10.0, description="Radius pencarian laporan terverifikasi (km)"),
+    limit: int = Query(10, ge=1, le=50),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    PRD 6.6: Riwayat Banjir Personal.
+    Mengambil laporan warga terverifikasi yang pernah terjadi di sekitar
+    setiap saved location (rumah, kantor, dll) milik user.
+    """
+    saved_locs = db.query(
+        SavedLocation.id,
+        SavedLocation.name,
+        SavedLocation.address,
+        func.ST_Y(SavedLocation.geom).label("lat"),
+        func.ST_X(SavedLocation.geom).label("lng"),
+        SavedLocation.geom
+    ).filter(SavedLocation.user_id == current_user.id).all()
+
+    history_result = []
+    radius_deg = radius_km / 111.0
+
+    for loc in saved_locs:
+        nearby_reports = db.query(
+            FloodReport.id,
+            FloodReport.location_name,
+            FloodReport.depth_cm,
+            FloodReport.condition,
+            FloodReport.verification_status,
+            FloodReport.ai_confidence,
+            FloodReport.created_at,
+            func.ST_Y(FloodReport.geom).label("lat"),
+            func.ST_X(FloodReport.geom).label("lng"),
+            func.ST_DistanceSphere(FloodReport.geom, loc.geom).label("distance_m")
+        ).filter(
+            FloodReport.is_verified == True,
+            func.ST_DWithin(FloodReport.geom, loc.geom, radius_deg)
+        ).order_by(FloodReport.created_at.desc()).limit(limit).all()
+
+        history_result.append({
+            "location_id": loc.id,
+            "location_name": loc.name,
+            "location_address": loc.address,
+            "location_lat": loc.lat,
+            "location_lng": loc.lng,
+            "flood_events": [
+                {
+                    "report_id": r.id,
+                    "location_name": r.location_name,
+                    "depth_cm": r.depth_cm,
+                    "condition": r.condition,
+                    "verification_status": r.verification_status,
+                    "ai_confidence": r.ai_confidence,
+                    "distance_m": int(round(r.distance_m)) if r.distance_m else None,
+                    "reported_at": r.created_at.isoformat() if r.created_at else None,
+                }
+                for r in nearby_reports
+            ],
+            "total_events": len(nearby_reports),
+        })
+
+    return {
+        "user_id": current_user.id,
+        "radius_km": radius_km,
+        "locations_checked": len(saved_locs),
+        "history": history_result,
+    }
+
+
+# ─────────────────────────────────────────────
+# POST /users/fcm-token  — Simpan FCM Token (P3.7)
+# ─────────────────────────────────────────────
+
+class FCMTokenRequest(BaseModel):
+    fcm_token: str
+    notification_enabled: bool = True
+
+
+@router.post("/fcm-token", status_code=status.HTTP_200_OK)
+def register_fcm_token(
+    payload: FCMTokenRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Simpan Firebase Cloud Messaging token device pengguna untuk push notification.
+    Token ini digunakan untuk mengirimkan alert banjir personal secara real-time (PRD 6.2).
+    """
+    current_user.fcm_token = payload.fcm_token
+    current_user.notification_enabled = payload.notification_enabled
+    db.commit()
+    return {
+        "message": "FCM token berhasil disimpan. Notifikasi banjir akan dikirim ke perangkat Anda.",
+        "notification_enabled": payload.notification_enabled
+    }
+
+
+@router.delete("/fcm-token", status_code=status.HTTP_200_OK)
+def unregister_fcm_token(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Hapus FCM token dan nonaktifkan push notification untuk user ini."""
+    current_user.fcm_token = None
+    current_user.notification_enabled = False
+    db.commit()
+    return {"message": "FCM token dihapus. Push notification dinonaktifkan."}
