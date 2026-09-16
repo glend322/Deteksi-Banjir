@@ -1,12 +1,25 @@
+import logging
+import secrets
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List, Union
 import json
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
+
+logger = logging.getLogger(__name__)
+
+# Known insecure defaults — refuse to use in production
+_INSECURE_SECRETS = {
+    "saferoute-semarang-super-secret-jwt-key-2026-hackathon",
+    "internal-saferoute-ai-key-2026",
+    "replace-with-a-secure-random-32-character-secret",
+    "replace-with-internal-api-key",
+}
+
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "SafeRoute API"
     API_V1_STR: str = "/api"
-    SECRET_KEY: str = "saferoute-semarang-super-secret-jwt-key-2026-hackathon"
+    SECRET_KEY: str = ""
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day
     ALGORITHM: str = "HS256"
 
@@ -20,7 +33,10 @@ class Settings(BaseSettings):
     MODELING_API_URL: str = "http://localhost:8001"
 
     # Internal API Key untuk endpoint AI Bridge (diisi via .env)
-    INTERNAL_API_KEY: str = "internal-saferoute-ai-key-2026"
+    INTERNAL_API_KEY: str = ""
+
+    # Firebase Cloud Messaging (FCM)
+    FIREBASE_CREDENTIALS_PATH: str = ""  # Path to serviceAccountKey.json
 
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["*"]
@@ -35,7 +51,25 @@ class Settings(BaseSettings):
             return v
         return ["*"]
 
+    @model_validator(mode="after")
+    def _warn_insecure_defaults(self) -> "Settings":
+        if not self.SECRET_KEY or self.SECRET_KEY in _INSECURE_SECRETS:
+            self.SECRET_KEY = secrets.token_urlsafe(48)
+            logger.warning(
+                "[SECURITY] SECRET_KEY not set or using insecure default — "
+                "generated a random key. Set SECRET_KEY in .env for stable JWTs."
+            )
+
+        if not self.INTERNAL_API_KEY or self.INTERNAL_API_KEY in _INSECURE_SECRETS:
+            self.INTERNAL_API_KEY = secrets.token_urlsafe(32)
+            logger.warning(
+                "[SECURITY] INTERNAL_API_KEY not set or using insecure default — "
+                "generated a random key. Set INTERNAL_API_KEY in .env for stable AI bridge auth."
+            )
+
+        return self
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-settings = Settings()
 
+settings = Settings()

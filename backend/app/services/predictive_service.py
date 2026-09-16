@@ -145,6 +145,16 @@ async def _process_single_watershed(zone: Dict[str, Any], db: Session, force_tri
             )
 
         logger.info(f"🚨 [Predictive Alert] Alert diterbitkan: {title_text}")
+
+        # Kirim push notification ke semua user
+        from app.services.notification_service import send_broadcast_notification
+        send_broadcast_notification(
+            title=title_text,
+            body=subtext,
+            data={"alert_slug": alert_slug, "zone": zone["name"]},
+            db=db,
+        )
+
         return {
             "zone": zone["name"],
             "status": "alert_active",

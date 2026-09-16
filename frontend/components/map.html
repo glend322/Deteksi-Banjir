@@ -28,6 +28,42 @@
             </button>
         </div>
 
+        <!-- Floating Weather Pill (Google Maps Style) -->
+        <div id="mapWeatherPill" class="weather-map-pill" role="button" tabindex="0" title="Klik untuk info cuaca lengkap">
+            <span class="weather-pill-icon" id="mapWeatherPillIcon">🌧️</span>
+            <span class="weather-pill-temp" id="mapWeatherPillTemp">26°C</span>
+            <span class="weather-pill-sep">•</span>
+            <span class="weather-pill-city" id="mapWeatherPillCity">Semarang</span>
+        </div>
+
+        <!-- Floating Weather Info Card (Google Maps Style Popover) -->
+        <div id="mapWeatherCard" class="weather-map-card" style="display: none;">
+            <div class="weather-card-head">
+                <div class="weather-card-loc">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="#2563EB" stroke="#2563EB"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+                    <span id="mapWeatherCardCity" class="weather-card-city-name">Semarang</span>
+                </div>
+                <div class="weather-card-head-right">
+                    <span class="weather-card-live-dot" title="Data Cuaca Real-Time"></span>
+                    <button type="button" class="weather-card-close" id="btnMapWeatherClose" aria-label="Tutup">&times;</button>
+                </div>
+            </div>
+
+            <div class="weather-card-current">
+                <div class="weather-current-icon" id="mapWeatherCardIcon">
+                    <!-- Dynamic Weather Icon -->
+                </div>
+                <div class="weather-current-info">
+                    <div class="weather-current-temp" id="mapWeatherCardTemp">26°C</div>
+                    <div class="weather-current-condition" id="mapWeatherCardCondition">Hujan Ringan</div>
+                </div>
+            </div>
+
+            <div class="weather-hourly-track" id="mapWeatherHourlyTrack">
+                <!-- Injected via JavaScript -->
+            </div>
+        </div>
+
         <!-- Leaflet Map Canvas -->
         <div id="map"></div>
 

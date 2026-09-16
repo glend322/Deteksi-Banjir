@@ -26,6 +26,15 @@ class User(Base):
     fcm_token = Column(String(500), nullable=True)       # Device token FCM
     notification_enabled = Column(Boolean, default=True) # User bisa opt-out notifikasi
 
+    # Email Verification (PRD)
+    email_verified = Column(Boolean, default=False)
+    verification_token = Column(String(255), nullable=True, index=True)
+    verification_token_expires = Column(DateTime(timezone=True), nullable=True)
+
+    # Password Reset
+    reset_token = Column(String(255), nullable=True, index=True)
+    reset_token_expires = Column(DateTime(timezone=True), nullable=True)
+
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
