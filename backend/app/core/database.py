@@ -22,6 +22,11 @@ def init_postgis():
             connection.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verified_reports INTEGER DEFAULT 0;"))
             connection.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS fcm_token VARCHAR(500);"))
             connection.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS notification_enabled BOOLEAN DEFAULT TRUE;"))
+            connection.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE;"))
+            connection.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token VARCHAR(255);"))
+            connection.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS verification_token_expires TIMESTAMP WITH TIME ZONE;"))
+            connection.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token VARCHAR(255);"))
+            connection.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_token_expires TIMESTAMP WITH TIME ZONE;"))
             # Auto-migrate: flood_reports
             connection.execute(text("ALTER TABLE flood_reports ADD COLUMN IF NOT EXISTS verification_status VARCHAR(50) DEFAULT 'pending';"))
             connection.execute(text("ALTER TABLE flood_reports ADD COLUMN IF NOT EXISTS confirmations_count INTEGER DEFAULT 0;"))

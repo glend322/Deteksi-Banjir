@@ -75,8 +75,9 @@ async def call_report_verifier(report_id: int, lat: float, lng: float, descripti
     except Exception as err:
         logger.debug(f"[AI Pipeline] Report verifier server tidak merespons ({err}), menggunakan rule-based verification.")
 
-    # Fallback jika service modeling terputus
-    return {"verification_status": "verified", "confidence_score": 0.88, "flags": []}
+    # Fallback jika service modeling terputus — jangan auto-verify, biarkan menunggu
+    logger.warning("[AI Pipeline] Report verifier offline — laporan ditandai 'pending' (tidak auto-verify).")
+    return {"verification_status": "pending", "confidence_score": 0.0, "flags": ["verifier_offline"]}
 
 async def process_ai_verification(report_id: int, db: Session):
     """

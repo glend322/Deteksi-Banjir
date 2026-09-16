@@ -1,6 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+import secrets
+import logging
+from datetime import datetime, timedelta, timezone
+from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from jose import JWTError, jwt
@@ -12,8 +15,13 @@ from app.core.security import verify_password, get_password_hash, create_access_
 from app.models.user import User, SavedLocation
 from app.schemas.user import UserRegister, UserLogin, TokenResponse, UserProfile, SavedLocationResponse
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login-form")
+
+VERIFICATION_TOKEN_EXPIRY_HOURS = 24
+RESET_TOKEN_EXPIRY_HOURS = 1
 
 def build_user_profile(user: User, db: Session) -> UserProfile:
     # Query saved locations with coordinates
@@ -92,17 +100,26 @@ def register(request: Request, payload: UserRegister, db: Session = Depends(get_
     if existing_user:
         raise HTTPException(status_code=400, detail="Email sudah terdaftar. Silakan login.")
 
+    verification_token = secrets.token_urlsafe(48)
+    verification_expires = datetime.now(timezone.utc) + timedelta(hours=VERIFICATION_TOKEN_EXPIRY_HOURS)
+
     user = User(
         email=payload.email,
         hashed_password=get_password_hash(payload.password),
         full_name=payload.full_name,
         vehicle_type=payload.vehicle_type,
         vehicle_max_depth_cm=payload.vehicle_max_depth_cm,
-        avatar_url="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
+        avatar_url="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+        verification_token=verification_token,
+        verification_token_expires=verification_expires,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    logger.info(
+        f"[AUTH] Verification token for {user.email}: {verification_token}"
+    )
 
     access_token = create_access_token(subject=user.id)
     return TokenResponse(
@@ -184,3 +201,127 @@ def change_password(
     current_user.hashed_password = get_password_hash(payload.new_password)
     db.commit()
     return {"message": "Password berhasil diubah. Silakan login kembali dengan password baru."}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Email Verification
+# ─────────────────────────────────────────────────────────────────────────────
+
+@router.post("/request-verification", status_code=status.HTTP_200_OK)
+@limiter.limit("5/minute")
+def request_verification(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Kirim ulang email verifikasi. Token baru dibuat dan yang lama invalid."""
+    if current_user.email_verified:
+        return {"message": "Email sudah terverifikasi.", "already_verified": True}
+
+    token = secrets.token_urlsafe(48)
+    expires = datetime.now(timezone.utc) + timedelta(hours=VERIFICATION_TOKEN_EXPIRY_HOURS)
+
+    current_user.verification_token = token
+    current_user.verification_token_expires = expires
+    db.commit()
+
+    logger.info(
+        f"[AUTH] Verification token for {current_user.email}: {token}"
+    )
+
+    return {
+        "message": "Token verifikasi berhasil dibuat. Cek log server untuk token (integrasi email belum tersedia).",
+        "token": token,
+    }
+
+
+@router.post("/verify-email", status_code=status.HTTP_200_OK)
+def verify_email(
+    token: str = Query(..., description="Token verifikasi dari email"),
+    db: Session = Depends(get_db),
+):
+    """Verifikasi email menggunakan token yang dikirim ke email user."""
+    user = db.query(User).filter(User.verification_token == token).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="Token verifikasi tidak valid.")
+
+    if user.verification_token_expires:
+        expires = user.verification_token_expires
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) > expires:
+            raise HTTPException(status_code=400, detail="Token verifikasi sudah kedaluwarsa. Silakan minta token baru.")
+
+    user.email_verified = True
+    user.verification_token = None
+    user.verification_token_expires = None
+    db.commit()
+
+    return {"message": "Email berhasil diverifikasi."}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Password Reset
+# ─────────────────────────────────────────────────────────────────────────────
+
+class RequestPasswordResetRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str = Field(..., min_length=6, description="Password baru minimal 6 karakter")
+
+
+@router.post("/request-password-reset", status_code=status.HTTP_200_OK)
+@limiter.limit("3/minute")
+def request_password_reset(
+    request: Request,
+    payload: RequestPasswordResetRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Minta reset password. Selalu return success untuk mencegah email enumeration.
+    Token di-log ke server (integrasi email belum tersedia).
+    """
+    user = db.query(User).filter(User.email == payload.email).first()
+
+    if user:
+        token = secrets.token_urlsafe(48)
+        expires = datetime.now(timezone.utc) + timedelta(hours=RESET_TOKEN_EXPIRY_HOURS)
+
+        user.reset_token = token
+        user.reset_token_expires = expires
+        db.commit()
+
+        logger.info(f"[AUTH] Password reset token for {user.email}: {token}")
+
+    # Selalu return success — jangan bocorkan apakah email terdaftar
+    return {
+        "message": "Jika email terdaftar, instruksi reset password telah dikirim.",
+    }
+
+
+@router.post("/reset-password", status_code=status.HTTP_200_OK)
+def reset_password(
+    payload: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+):
+    """Reset password menggunakan token dari email."""
+    user = db.query(User).filter(User.reset_token == payload.token).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="Token reset tidak valid.")
+
+    if user.reset_token_expires:
+        expires = user.reset_token_expires
+        if expires.tzinfo is None:
+            expires = expires.replace(tzinfo=timezone.utc)
+        if datetime.now(timezone.utc) > expires:
+            raise HTTPException(status_code=400, detail="Token reset sudah kedaluwarsa. Silakan minta token baru.")
+
+    user.hashed_password = get_password_hash(payload.new_password)
+    user.reset_token = None
+    user.reset_token_expires = None
+    db.commit()
+
+    return {"message": "Password berhasil direset. Silakan login dengan password baru."}

@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from app.core.database import get_db
 from app.models.weather import Alert, WeatherForecastCache
 from app.schemas.weather import WeatherResponse, AlertResponse, EmergencyContact, EducationGuide, HourlyForecast
 
-from app.services.weather_service import fetch_and_update_weather
+from app.services.weather_service import fetch_and_update_weather, fetch_weather_by_coords
 from app.services.predictive_service import run_predictive_flood_engine
 from app.services.decay_service import apply_confidence_decay
 
@@ -33,7 +33,28 @@ async def trigger_predictive_engine(force_trigger: bool = False, db: Session = D
     }
 
 @router.get("/current", response_model=WeatherResponse)
-def get_current_weather(db: Session = Depends(get_db)):
+async def get_current_weather(
+    lat: Optional[float] = Query(None, ge=-90, le=90, description="Latitude posisi pengguna"),
+    lng: Optional[float] = Query(None, ge=-180, le=180, description="Longitude posisi pengguna"),
+    db: Session = Depends(get_db)
+):
+    """
+    Mengambil data cuaca saat ini dan prakiraan per jam.
+    Mendukung koordinat GPS spesifik (dinamis) atau fallback ke cache Kota Semarang.
+    """
+    if lat is not None and lng is not None:
+        coords_weather = await fetch_weather_by_coords(lat, lng)
+        if coords_weather:
+            forecast = [HourlyForecast(**f) for f in coords_weather["forecast_hourly"]]
+            return WeatherResponse(
+                city=coords_weather["city"],
+                condition=coords_weather["condition"],
+                temp=coords_weather["temp"],
+                humidity=coords_weather["humidity"],
+                wind_speed=coords_weather["wind_speed"],
+                forecast_hourly=forecast
+            )
+
     # Ambil dari cache atau return data default BMKG Semarang
     cache = db.query(WeatherForecastCache).filter(WeatherForecastCache.city == "Semarang").first()
     if cache and cache.forecast_hourly:
@@ -49,17 +70,17 @@ def get_current_weather(db: Session = Depends(get_db)):
 
     # Fallback BMKG data
     default_forecast = [
-        HourlyForecast(time="09:00", temp=26, icon="cloud-drizzle", condition="Gerimis"),
-        HourlyForecast(time="11:00", temp=27, icon="cloud-rain", condition="Hujan Sedang"),
-        HourlyForecast(time="13:00", temp=28, icon="cloud-rain", condition="Hujan Lebat"),
-        HourlyForecast(time="15:00", temp=27, icon="cloud-lightning", condition="Hujan Petir"),
-        HourlyForecast(time="17:00", temp=26, icon="cloud-rain", condition="Hujan Ringan"),
-        HourlyForecast(time="19:00", temp=25, icon="cloud", condition="Berawan")
+        HourlyForecast(time="10.00", temp=26, icon="cloud-rain", condition="Hujan Ringan"),
+        HourlyForecast(time="11.00", temp=27, icon="cloud-rain", condition="Hujan Sedang"),
+        HourlyForecast(time="12.00", temp=27, icon="cloud-sun", condition="Cerah Berawan"),
+        HourlyForecast(time="13.00", temp=28, icon="cloud", condition="Berawan"),
+        HourlyForecast(time="14.00", temp=28, icon="cloud", condition="Berawan"),
+        HourlyForecast(time="15.00", temp=27, icon="cloud-lightning", condition="Hujan Petir")
     ]
     return WeatherResponse(
         city="Semarang",
         condition="Hujan Ringan",
-        temp=27,
+        temp=26,
         humidity=86,
         wind_speed="14 km/jam",
         forecast_hourly=default_forecast

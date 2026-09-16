@@ -114,6 +114,16 @@ def receive_ai_prediction(
 
     db.commit()
 
+    # Kirim push notification jika ada alert
+    if alert_id:
+        from app.services.notification_service import send_broadcast_notification
+        send_broadcast_notification(
+            title=payload.alert_title or f"Peringatan Banjir: {payload.location_name}",
+            body=payload.alert_subtext or f"Deteksi genangan {payload.estimated_depth_cm} cm di {payload.area}. Hindari jalan ini.",
+            data={"alert_id": str(alert_id), "flood_point_id": str(point_id)},
+            db=db,
+        )
+
     return AIPredictionResponse(
         status="success",
         message=f"Prediksi AI untuk {payload.location_name} berhasil disimpan ke database geospasial",
